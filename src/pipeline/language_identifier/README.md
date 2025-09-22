@@ -86,4 +86,4 @@ The tool can identify up to k languages (k is passed as a parameter). If `k == 1
 *   Python 3.12+
 *   Language identifiers: [GlotLID](https://github.com/cisnlp/GlotLID), [FastText](https://huggingface.co/facebook/fasttext-language-identification), [OpenLID](https://github.com/laurieburchell/open-lid-dataset)
 
-These dependencies are listed in the `requirements.txt` file.
+The rest of dependencies are listed in the `requirements.txt` file.
