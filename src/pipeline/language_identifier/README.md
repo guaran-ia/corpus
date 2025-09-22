@@ -7,7 +7,7 @@ and comparison of results.
 
 The tool can identify up to k languages (k is passed as a parameter). If `k == 1`, majority voting is conducted to select the language chosen by at least two of the three models (if all three are available). The `GlotLID` result is preferred if it is among the agreeing voters; otherwise, the `OpenLID` result is used. For `k > 1`, the `GlotLID` prediction is returned.
 
-:information_source: This tool is intended to be used by all language identification efforts throughout the Guarania project.
+:information_source: **This tool is intended to be used by all language identification efforts throughout the Guarania project.**
 
 ## Installation
 1.  Clone the repository:
