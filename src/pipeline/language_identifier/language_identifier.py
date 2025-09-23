@@ -180,7 +180,7 @@ class LanguageIdentifier:
                     return {
                         'languages': identification_results['glotlid'][0],
                         'source': 'glotlid',
-                        'voting': 'all_agree'
+                        'voting': 'agree_glotlib_fasttext_openlid'
                     }
                 elif glotlib_lang is not None and \
                         fasttext_lang is not None and \

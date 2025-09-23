@@ -56,14 +56,14 @@ The tool can identify up to k languages (k is passed as a parameter). If `k == 1
     *   `languages`: A list of (language code, confidence score) tuples, representing the distribution of predicted languages.
     *   `source`: The source of the prediction (e.g., 'glotlid', 'fasttext', 'openlid').
     *   `voting`: A string indicating how the final prediction was determined 
-    *   (e.g., 'all\_agree', 'agree\_glotlib\_fasttext', 'inconclusive').
+    *   (e.g., 'agree\_glotlib\_fasttext\_openlid', 'agree\_glotlib\_fasttext', 'inconclusive').
     
     Output example for `k=1`
     ```python
     {
         'languages': ('grn', 0.7193270921707153),
         'source': 'glotlid',
-        'voting': 'all_agree'
+        'voting': 'agree_glotlib_fasttext_openlid'
     }
     ```
 

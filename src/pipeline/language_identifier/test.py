@@ -23,7 +23,7 @@ class TestLanguageIdentifier(unittest.TestCase):
         self.assertIn('languages', result)
         self.assertEqual('grn', result['languages'][0])  # Expecting Guarani as the top language
         self.assertEqual('glotlid', result['source'])
-        self.assertEqual('all_agree', result['voting'])
+        self.assertEqual('agree_glotlib_fasttext_openlid', result['voting'])
         
     def test_identify_languages_k_2(self):
         result = self.lang_identifier.identify_languages(self.sample_text, k=2)
