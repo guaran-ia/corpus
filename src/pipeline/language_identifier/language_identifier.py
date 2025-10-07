@@ -45,7 +45,7 @@ class LanguageIdentifier:
             repo_id='cis-lmu/glotlid', 
             filename='model.bin', 
             cache_dir='models',
-            local_files_only=True
+            local_files_only=False
         )
         try:
             if verbose: print(f'Loading GlotLID model from {model_path}')
@@ -68,7 +68,7 @@ class LanguageIdentifier:
             repo_id="facebook/fasttext-language-identification", 
             filename="model.bin",
             cache_dir="models",
-            local_files_only=True
+            local_files_only=False
         )
         try:
             if verbose: print(f'Loading FastText model from {model_path}')
