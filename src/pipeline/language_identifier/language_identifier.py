@@ -284,16 +284,3 @@ class LanguageIdentifier:
                 return self.compute_prediction_result(identification_results, k)
         else:
             raise ValueError("k must be greater than 0")
-
-
-if __name__ == "__main__":
-    sample_text = "La sintaxis de la formación de estos ñe'ẽnga es la siguiente: "\
-                  "La primera frase se dice según la situación del momento, dentro "\
-                  "de aparente normalidad. La segunda frase sin embargo, señala que "\
-                  "también pudiera decir lo mismo alguien que está en una situación "\
-                  "completamente diferente, o con otro sentido. Añetehápe, heta jevy "\
-                  "upe ñe'ẽjoapy mokõiha reko hasy oiko haĝua térã ndaikatúi voi, ha "\
-                  "upéare ijuky."
-    lang_identifier = LanguageIdentifier()
-    res = lang_identifier.identify_languages(sample_text, k=2)
-    pprint(res)
