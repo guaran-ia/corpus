@@ -1,9 +1,8 @@
-
 import fasttext
+import os
 import pandas as pd
 
 from huggingface_hub import hf_hub_download
-from pprint import pprint
 
 
 class LanguageIdentifier:
@@ -12,6 +11,7 @@ class LanguageIdentifier:
     language identification models: GLotLID, FastText, and OpenLID.
     """
     glotlid_model, fasttext_model, openlid_model = None, None, None
+    models_dir_path = None
     
     def __init__(self, glotlid=True, fasttext=True, openlid=True, verbose=False):
         """
@@ -23,13 +23,18 @@ class LanguageIdentifier:
             openlid (bool, optional): Whether to load the OpenLID model. Defaults to True.
             verbose (bool, optional): Whether to print verbose output. Defaults to False.
         """
+        # Get the directory of the current file
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        self.models_dir_path = os.path.join(file_dir, 'models')
         if glotlid:
             self.glotlid_model = self.load_glotlid_model(verbose=verbose)
         if fasttext:
             self.fasttext_model = self.load_fasttext_model(verbose=verbose)
         if openlid:
             self.openlid_model = self.load_openlid_model(verbose=verbose)
-        self.df_isocodes = pd.read_csv('res/iso6393_macro.csv')
+        # Construct the absolute path to the CSV file
+        iso_file_path = os.path.join(file_dir, 'res', 'iso6393_macro.csv')
+        self.df_isocodes = pd.read_csv(iso_file_path)
 
     def load_glotlid_model(self, verbose=False):
         """
@@ -44,7 +49,7 @@ class LanguageIdentifier:
         model_path = hf_hub_download(
             repo_id='cis-lmu/glotlid', 
             filename='model.bin', 
-            cache_dir='models',
+            cache_dir=self.models_dir_path,
             local_files_only=False
         )
         try:
@@ -65,9 +70,9 @@ class LanguageIdentifier:
             fasttext.FastText._FastText: The loaded FastText model, or None if an error occurred.
         """
         model_path = hf_hub_download(
-            repo_id="facebook/fasttext-language-identification", 
-            filename="model.bin",
-            cache_dir="models",
+            repo_id='facebook/fasttext-language-identification', 
+            filename='model.bin',
+            cache_dir=self.models_dir_path,
             local_files_only=False
         )
         try:
@@ -87,7 +92,7 @@ class LanguageIdentifier:
         Returns:
             fasttext.FastText._FastText: The loaded OpenLID model, or None if an error occurred.
         """
-        model_path = "models/lid201-model.bin"
+        model_path = os.path.join(self.models_dir_path, 'lid201-model.bin')
         try:
             if verbose: print(f'Loading OpenLID model from {model_path}')
             return fasttext.load_model(model_path)
