@@ -167,6 +167,7 @@ class LanguageIdentifier:
                   'inconclusive').
         """
         if k == 1:
+            glotlib_lang, fasttext_lang, openlid_lang = None, None, None
             if identification_results['glotlid'] is not None:
                 glotlib_lang = identification_results['glotlid'][0][0]
             if identification_results['fasttext'] is not None:
