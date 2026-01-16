@@ -1,15 +1,5 @@
-"""
-Heuristics runner.
-
-This module applies sentence-level and document-level heuristic metrics
-to corpora stored as JSONL files in data/raw.
-
-The runner does not store results yet; it only computes and prints them.
-"""
-
 import json
 from pathlib import Path
-from typing import List
 
 from .sentence_metrics import (
     average_uppercase_letters_per_sentence,
@@ -18,7 +8,6 @@ from .sentence_metrics import (
     average_characters_per_sentence,
     average_alphanumeric_characters_per_sentence,
     mean_word_length,
-    average_sentence_length,
     max_sentence_length,
     min_sentence_length,
     average_ratio_of_symbols_to_words,
@@ -30,96 +19,133 @@ from .sentence_metrics import (
     max_sentences_per_document,
 )
 
-RAW_DATA_DIR = Path("data/raw")
-TEXT_FIELD = "text"
+# ---------------------------------------------------------------------
+# DATA DIRECTORY
+# ---------------------------------------------------------------------
+
+DATA_DIR = Path("data/raw")
 
 
-def read_jsonl_texts(path: Path) -> List[str]:
-    texts = []
-    with path.open(encoding="utf-8") as f:
+# ---------------------------------------------------------------------
+# HELPERS
+# ---------------------------------------------------------------------
+
+def read_jsonl(path: Path):
+    """Yield JSON records from a .jsonl file."""
+    with path.open() as f:
         for line in f:
-            obj = json.loads(line)
-            if TEXT_FIELD in obj and obj[TEXT_FIELD].strip():
-                texts.append(obj[TEXT_FIELD])
-    return texts
+            yield json.loads(line)
 
 
-def run_on_file(jsonl_path: Path) -> None:
-    print(f"\nProcessing corpus file: {jsonl_path.name}")
+def extract_text(record: dict) -> str:
+    """
+    Extract text from common fields used in GuaranIA corpora.
+    """
+    for key in ("text", "sentence", "content"):
+        if key in record and isinstance(record[key], str):
+            return record[key]
+    return ""
 
-    documents = read_jsonl_texts(jsonl_path)
 
-    if not documents:
-        print("No documents found.")
-        return
+def run_on_file(path: Path) -> dict:
+    """
+    Run all heuristics on a single corpus file.
+    """
+    texts = []
+    for record in read_jsonl(path):
+        text = extract_text(record)
+        if text:
+            texts.append(text)
 
+    if not texts:
+        return {}
+
+    # Sentence-level metrics (averaged over documents)
     sentence_metrics = {
-        "avg_uppercase_letters_per_sentence":
-            sum(average_uppercase_letters_per_sentence(t) for t in documents) / len(documents),
+        "avg_uppercase_letters_per_sentence": sum(
+            average_uppercase_letters_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "avg_numbers_per_sentence":
-            sum(average_numbers_per_sentence(t) for t in documents) / len(documents),
+        "avg_numbers_per_sentence": sum(
+            average_numbers_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "avg_words_per_sentence":
-            sum(average_words_per_sentence(t) for t in documents) / len(documents),
+        "avg_words_per_sentence": sum(
+            average_words_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "avg_characters_per_sentence":
-            sum(average_characters_per_sentence(t) for t in documents) / len(documents),
+        "avg_characters_per_sentence": sum(
+            average_characters_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "avg_alphanumeric_characters_per_sentence":
-            sum(average_alphanumeric_characters_per_sentence(t) for t in documents) / len(documents),
+        "avg_alphanumeric_characters_per_sentence": sum(
+            average_alphanumeric_characters_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "mean_word_length":
-            sum(mean_word_length(t) for t in documents) / len(documents),
+        "mean_word_length": sum(
+            mean_word_length(t) for t in texts
+        ) / len(texts),
 
-        "avg_sentence_length":
-            sum(average_sentence_length(t) for t in documents) / len(documents),
+        "max_sentence_length": max(
+            max_sentence_length(t) for t in texts
+        ),
 
-        "max_sentence_length":
-            max(max_sentence_length(t) for t in documents),
+        "min_sentence_length": min(
+            min_sentence_length(t) for t in texts
+        ),
 
-        "min_sentence_length":
-            min(min_sentence_length(t) for t in documents),
+        "avg_ratio_symbols_to_words": sum(
+            average_ratio_of_symbols_to_words(t) for t in texts
+        ) / len(texts),
 
-        "avg_symbol_to_word_ratio":
-            sum(average_ratio_of_symbols_to_words(t) for t in documents) / len(documents),
+        "avg_ratio_stopwords_to_non_stopwords": sum(
+            average_ratio_of_stopwords_to_non_stopwords(t) for t in texts
+        ) / len(texts),
 
-        "avg_stopword_to_non_stopword_ratio":
-            sum(average_ratio_of_stopwords_to_non_stopwords(t) for t in documents) / len(documents),
+        "avg_character_repetition_ratio_per_sentence": sum(
+            average_character_repetition_ratio_per_sentence(t) for t in texts
+        ) / len(texts),
 
-        "avg_character_repetition_ratio":
-            sum(average_character_repetition_ratio_per_sentence(t) for t in documents) / len(documents),
-
-        "avg_word_repetition_ratio":
-            sum(average_word_repetition_ratio_per_sentence(t) for t in documents) / len(documents),
+        "avg_word_repetition_ratio_per_sentence": sum(
+            average_word_repetition_ratio_per_sentence(t) for t in texts
+        ) / len(texts),
     }
 
+    # Document-level metrics
     document_metrics = {
-        "avg_sentences_per_document":
-            average_sentences_per_document(documents),
-
-        "min_sentences_per_document":
-            min_sentences_per_document(documents),
-
-        "max_sentences_per_document":
-            max_sentences_per_document(documents),
+        "avg_sentences_per_document": average_sentences_per_document(texts),
+        "min_sentences_per_document": min_sentences_per_document(texts),
+        "max_sentences_per_document": max_sentences_per_document(texts),
     }
 
-    print("Sentence-level metrics:")
-    for k, v in sentence_metrics.items():
-        print(f"  {k}: {v:.4f}")
+    return {
+        "sentence_metrics": sentence_metrics,
+        "document_metrics": document_metrics,
+    }
 
-    print("Document-level metrics:")
-    for k, v in document_metrics.items():
-        print(f"  {k}: {v}")
+
+# ---------------------------------------------------------------------
+# MAIN
+# ---------------------------------------------------------------------
+
+def main():
+    for jsonl_file in DATA_DIR.glob("*.jsonl"):
+        print(f"\nProcessing corpus: {jsonl_file.name}")
+        results = run_on_file(jsonl_file)
+
+        if not results:
+            print("No valid texts found.")
+            continue
+
+        print("Sentence-level metrics:")
+        for k, v in results["sentence_metrics"].items():
+            print(f"  {k}: {v}")
+
+        print("Document-level metrics:")
+        for k, v in results["document_metrics"].items():
+            print(f"  {k}: {v}")
 
 
 if __name__ == "__main__":
-
-    if not RAW_DATA_DIR.exists():
-        print("data/raw directory not found.")
-        raise SystemExit(1)
-
-    for jsonl_file in sorted(RAW_DATA_DIR.glob("*.jsonl")):
-        run_on_file(jsonl_file)
+    main()
 
