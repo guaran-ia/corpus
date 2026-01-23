@@ -1,16 +1,39 @@
-import spacy
+"""
+Sentence-level and document-level heuristic metrics.
+"""
+
 from typing import List
-from .word_frequency import tokenize
-from .stopwords import STOPWORDS
+from pathlib import Path
+import spacy
+
+from .tokenization import tokenize
+
 
 
 # ---------------------------------------------------------------------
-# NLP INITIALIZATION (solo segmentación de oraciones)
+# NLP INITIALIZATION (sentence segmentation only)
 # ---------------------------------------------------------------------
 
 _nlp = spacy.blank("xx")
 _nlp.add_pipe("sentencizer")
 _nlp.max_length = 3_000_000
+
+
+# ---------------------------------------------------------------------
+# STOPWORDS (loaded directly from txt)
+# ---------------------------------------------------------------------
+
+STOPWORDS_PATH = Path(__file__).parent / "stopwords.txt"
+
+def load_stopwords() -> set[str]:
+    with STOPWORDS_PATH.open(encoding="utf-8") as f:
+        return {
+            line.strip().lower()
+            for line in f
+            if line.strip() and not line.startswith("#")
+        }
+
+STOPWORDS = load_stopwords()
 
 
 # ---------------------------------------------------------------------
@@ -65,7 +88,6 @@ def stopword_counts(sentence: str) -> tuple[int, int]:
             non_stop += 1
 
     return stop, non_stop
-
 
 
 def word_repetition_ratio(sentence: str) -> float:
@@ -138,17 +160,12 @@ def average_ratio_of_symbols_to_words(text: str) -> float:
 
 
 def average_ratio_of_stopwords_to_non_stopwords(text: str) -> float:
-    sents = sentences(text)
     ratios = []
-
-    for s in sents:
+    for s in sentences(text):
         stop, non_stop = stopword_counts(s)
         if non_stop > 0:
             ratios.append(stop / non_stop)
-
     return sum(ratios) / len(ratios) if ratios else 0.0
-
-
 
 
 def average_character_repetition_ratio_per_sentence(text: str) -> float:
@@ -182,3 +199,4 @@ def min_sentences_per_document(texts: List[str]) -> int:
 def max_sentences_per_document(texts: List[str]) -> int:
     counts = sentence_counts_per_document(texts)
     return max(counts) if counts else 0
+
