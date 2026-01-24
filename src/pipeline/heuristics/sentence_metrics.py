@@ -77,17 +77,16 @@ def symbols_count(sentence: str) -> int:
 # WORD-LEVEL HELPERS
 # ---------------------------------------------------------------------
 
-def stopword_counts(sentence: str) -> tuple[int, int]:
-    stop = 0
-    non_stop = 0
-
+def stopword_count(sentence: str) -> int:
+    """
+    Returns the number of stopwords in a sentence.
+    """
+    count = 0
     for tok in tokenize(sentence):
         if tok in STOPWORDS:
-            stop += 1
-        else:
-            non_stop += 1
+            count += 1
+    return count
 
-    return stop, non_stop
 
 
 def word_repetition_ratio(sentence: str) -> float:
@@ -151,21 +150,41 @@ def min_sentence_length(text: str) -> int:
 
 
 def average_ratio_of_symbols_to_words(text: str) -> float:
-    ratios = []
+    """
+    Computes the ratio of symbols to words over the entire text.
+    """
+    total_symbols = 0
+    total_words = 0
+
     for s in sentences(text):
-        w = len(words(s))
-        if w > 0:
-            ratios.append(symbols_count(s) / w)
-    return sum(ratios) / len(ratios) if ratios else 0.0
+        total_symbols += symbols_count(s)
+        total_words += len(words(s))
+
+    if total_words == 0:
+        return 0.0
+
+    return total_symbols / total_words
+
 
 
 def average_ratio_of_stopwords_to_non_stopwords(text: str) -> float:
-    ratios = []
+    """
+    Computes the ratio of stopwords to non-stopwords over the entire text.
+    """
+    total_stopwords = 0
+    total_words = 0
+
     for s in sentences(text):
-        stop, non_stop = stopword_counts(s)
-        if non_stop > 0:
-            ratios.append(stop / non_stop)
-    return sum(ratios) / len(ratios) if ratios else 0.0
+        tokens = words(s)
+        total_words += len(tokens)
+        total_stopwords += stopword_count(s)
+
+    non_stopwords = total_words - total_stopwords
+    if non_stopwords == 0:
+        return 0.0
+
+    return total_stopwords / non_stopwords
+
 
 
 def average_character_repetition_ratio_per_sentence(text: str) -> float:
