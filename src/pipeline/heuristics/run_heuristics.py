@@ -60,55 +60,44 @@ def run_on_file(path: Path) -> dict:
     if not texts:
         return {}
 
-    # Sentence-level metrics (averaged over documents)
+    # Sentence-level metrics (per document)
     sentence_metrics = {
-        "avg_uppercase_letters_per_sentence": sum(
+        "avg_uppercase_letters_per_sentence": [
             average_uppercase_letters_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "avg_numbers_per_sentence": sum(
+        ],
+        "avg_numbers_per_sentence": [
             average_numbers_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "avg_words_per_sentence": sum(
+        ],
+        "avg_words_per_sentence": [
             average_words_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "avg_characters_per_sentence": sum(
+        ],
+        "avg_characters_per_sentence": [
             average_characters_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "avg_alphanumeric_characters_per_sentence": sum(
+        ],
+        "avg_alphanumeric_characters_per_sentence": [
             average_alphanumeric_characters_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "mean_word_length": sum(
+        ],
+        "mean_word_length": [
             mean_word_length(t) for t in texts
-        ) / len(texts),
-
-        "max_sentence_length": max(
+        ],
+        "max_sentence_length": [
             max_sentence_length(t) for t in texts
-        ),
-
-        "min_sentence_length": min(
+        ],
+        "min_sentence_length": [
             min_sentence_length(t) for t in texts
-        ),
-
-        "avg_ratio_symbols_to_words": sum(
+        ],
+        "ratio_symbols_to_words": [
             average_ratio_of_symbols_to_words(t) for t in texts
-        ) / len(texts),
-
-        "avg_ratio_stopwords_to_non_stopwords": sum(
+        ],
+        "ratio_stopwords_to_non_stopwords": [
             average_ratio_of_stopwords_to_non_stopwords(t) for t in texts
-        ) / len(texts),
-
-        "avg_character_repetition_ratio_per_sentence": sum(
+        ],
+        "avg_character_repetition_ratio_per_sentence": [
             average_character_repetition_ratio_per_sentence(t) for t in texts
-        ) / len(texts),
-
-        "avg_word_repetition_ratio_per_sentence": sum(
+        ],
+        "avg_word_repetition_ratio_per_sentence": [
             average_word_repetition_ratio_per_sentence(t) for t in texts
-        ) / len(texts),
+        ],
     }
 
     # Document-level metrics
@@ -137,7 +126,7 @@ def main():
             print("No valid texts found.")
             continue
 
-        print("Sentence-level metrics:")
+        print("Sentence-level metrics (per document):")
         for k, v in results["sentence_metrics"].items():
             print(f"  {k}: {v}")
 
@@ -148,4 +137,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

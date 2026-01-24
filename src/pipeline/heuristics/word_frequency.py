@@ -9,7 +9,7 @@ DATA_DIR = Path("data/raw")
 
 def extract_text(record: dict) -> str:
     """
-    Extrae texto de campos comunes en los corpora GuaranIA.
+    Extracts text from common fields used in GuaranIA corpora.
     """
     for key in ("text", "sentence", "content"):
         if key in record and isinstance(record[key], str):
@@ -19,8 +19,7 @@ def extract_text(record: dict) -> str:
 
 def word_frequencies() -> Counter:
     """
-    Calcula frecuencias de palabras sobre todos los corpora en data/raw.
-    (Exploratorio: NO filtra stopwords)
+    Computes word frequencies over all corpora in data/raw.
     """
     counter = Counter()
 

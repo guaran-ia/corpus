@@ -1,4 +1,3 @@
-# Guarani stopwords
 ha
 pe
 upe
@@ -31,8 +30,6 @@ peve
 rupi
 gui
 py
-
-# Spanish stopwords
 de
 del
 al

@@ -4,8 +4,7 @@ _tokenizer = TweetTokenizer(preserve_case=False)
 
 def tokenize(text: str):
     """
-    Tokeniza texto usando TweetTokenizer.
-    Devuelve solo tokens alfabéticos (unicode).
+    Tokenizes text using NLTK TweetTokenizer and yields alphabetic tokens only.
     """
     for token in _tokenizer.tokenize(text):
         if token.isalpha():
