@@ -121,6 +121,12 @@ def average_words_per_sentence(text: str) -> float:
     sents = sentences(text)
     return sum(len(words(s)) for s in sents) / len(sents) if sents else 0.0
 
+def average_sentence_length(text: str) -> float:
+    """
+    Alias of average_words_per_sentence.
+    Sentence length measured in number of words.
+    """
+    return average_words_per_sentence(text)
 
 def average_characters_per_sentence(text: str) -> float:
     sents = sentences(text)
