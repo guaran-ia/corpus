@@ -10,6 +10,7 @@ from .sentence_metrics import (
     mean_word_length,
     max_sentence_length,
     min_sentence_length,
+    average_sentence_length,
     average_ratio_of_symbols_to_words,
     average_ratio_of_stopwords_to_non_stopwords,
     average_character_repetition_ratio_per_sentence,
@@ -91,6 +92,9 @@ def run_on_file(path: Path) -> dict:
         ],
         "ratio_stopwords_to_non_stopwords": [
             average_ratio_of_stopwords_to_non_stopwords(t) for t in texts
+        ],
+        "avg_sentence_length": [
+            average_sentence_length(t) for t in texts
         ],
         "avg_character_repetition_ratio_per_sentence": [
             average_character_repetition_ratio_per_sentence(t) for t in texts
