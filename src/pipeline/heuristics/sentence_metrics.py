@@ -16,7 +16,7 @@ from .tokenization import tokenize
 
 _nlp = spacy.blank("xx")
 _nlp.add_pipe("sentencizer")
-_nlp.max_length = 3_000_000
+_nlp.max_length = 10_000_000
 
 
 # ---------------------------------------------------------------------
