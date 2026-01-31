@@ -2,6 +2,9 @@ import json
 from pathlib import Path
 
 from .sentence_metrics import (
+    # --------------------------------------------------
+    # OLD METRICS (analysis only, corpus-level)
+    # --------------------------------------------------
     average_uppercase_letters_per_sentence,
     average_numbers_per_sentence,
     average_words_per_sentence,
@@ -15,27 +18,46 @@ from .sentence_metrics import (
     average_ratio_of_stopwords_to_non_stopwords,
     average_character_repetition_ratio_per_sentence,
     average_word_repetition_ratio_per_sentence,
-    average_sentences_per_document,
-    min_sentences_per_document,
-    max_sentences_per_document,
+
+    # --------------------------------------------------
+    # NEW METRICS (stored per document)
+    # --------------------------------------------------
+    count_lorem_ipsum_sentences,
+    count_sentences_ending_with_ellipsis,
+    count_sentences_starting_with_bullet,
+    count_sentences_without_terminal_punctuation,
+    count_sentences_with_curly_bracket,
+    count_sentences_with_legal_phrases,
+    count_sentences_with_low_guarani_proportion,
+    count_sentences_with_javascript,
+    average_words_in_sentences_starting_with_capital,
+    count_bad_words_occurrences,
 )
 
 # ---------------------------------------------------------------------
-# DATA DIRECTORY
+# DIRECTORIES
 # ---------------------------------------------------------------------
 
-DATA_DIR = Path("data/raw")
-
+RAW_DIR = Path("data/raw")
+PROCESSED_DIR = Path("data/processed")
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
 # ---------------------------------------------------------------------
 # HELPERS
 # ---------------------------------------------------------------------
 
 def read_jsonl(path: Path):
-    """Yield JSON records from a .jsonl file."""
-    with path.open() as f:
+    """Yield JSON records from a JSONL file."""
+    with path.open(encoding="utf-8") as f:
         for line in f:
             yield json.loads(line)
+
+
+def write_jsonl(path: Path, records):
+    """Write records to a JSONL file."""
+    with path.open("w", encoding="utf-8") as f:
+        for rec in records:
+            f.write(json.dumps(rec, ensure_ascii=False) + "\n")
 
 
 def extract_text(record: dict) -> str:
@@ -47,97 +69,134 @@ def extract_text(record: dict) -> str:
             return record[key]
     return ""
 
+# ---------------------------------------------------------------------
+# MAIN PROCESSING
+# ---------------------------------------------------------------------
 
-def run_on_file(path: Path) -> dict:
+def process_file(input_path: Path, output_path: Path):
     """
-    Run all heuristics on a single corpus file.
+    Process a single corpus file:
+    - compute old metrics at corpus level (printed once)
+    - compute new metrics per document (stored in processed JSONL)
     """
-    texts = []
-    for record in read_jsonl(path):
+    processed_records = []
+
+    # Accumulators for old metrics
+    old_metrics = {
+        "avg_uppercase_letters_per_sentence": [],
+        "avg_numbers_per_sentence": [],
+        "avg_words_per_sentence": [],
+        "avg_characters_per_sentence": [],
+        "avg_alphanumeric_characters_per_sentence": [],
+        "mean_word_length": [],
+        "max_sentence_length": [],
+        "min_sentence_length": [],
+        "avg_sentence_length": [],
+        "ratio_symbols_to_words": [],
+        "ratio_stopwords_to_non_stopwords": [],
+        "avg_character_repetition_ratio": [],
+        "avg_word_repetition_ratio": [],
+    }
+
+    print(f"\nProcessing corpus: {input_path.name}")
+
+    for record in read_jsonl(input_path):
         text = extract_text(record)
-        if text:
-            texts.append(text)
+        if not text:
+            continue
 
-    if not texts:
-        return {}
+        # --------------------------------------------------------------
+        # OLD METRICS (accumulate only)
+        # --------------------------------------------------------------
+        old_metrics["avg_uppercase_letters_per_sentence"].append(
+            average_uppercase_letters_per_sentence(text)
+        )
+        old_metrics["avg_numbers_per_sentence"].append(
+            average_numbers_per_sentence(text)
+        )
+        old_metrics["avg_words_per_sentence"].append(
+            average_words_per_sentence(text)
+        )
+        old_metrics["avg_characters_per_sentence"].append(
+            average_characters_per_sentence(text)
+        )
+        old_metrics["avg_alphanumeric_characters_per_sentence"].append(
+            average_alphanumeric_characters_per_sentence(text)
+        )
+        old_metrics["mean_word_length"].append(
+            mean_word_length(text)
+        )
+        old_metrics["max_sentence_length"].append(
+            max_sentence_length(text)
+        )
+        old_metrics["min_sentence_length"].append(
+            min_sentence_length(text)
+        )
+        old_metrics["avg_sentence_length"].append(
+            average_sentence_length(text)
+        )
+        old_metrics["ratio_symbols_to_words"].append(
+            average_ratio_of_symbols_to_words(text)
+        )
+        old_metrics["ratio_stopwords_to_non_stopwords"].append(
+            average_ratio_of_stopwords_to_non_stopwords(text)
+        )
+        old_metrics["avg_character_repetition_ratio"].append(
+            average_character_repetition_ratio_per_sentence(text)
+        )
+        old_metrics["avg_word_repetition_ratio"].append(
+            average_word_repetition_ratio_per_sentence(text)
+        )
 
-    # Sentence-level metrics (per document)
-    sentence_metrics = {
-        "avg_uppercase_letters_per_sentence": [
-            average_uppercase_letters_per_sentence(t) for t in texts
-        ],
-        "avg_numbers_per_sentence": [
-            average_numbers_per_sentence(t) for t in texts
-        ],
-        "avg_words_per_sentence": [
-            average_words_per_sentence(t) for t in texts
-        ],
-        "avg_characters_per_sentence": [
-            average_characters_per_sentence(t) for t in texts
-        ],
-        "avg_alphanumeric_characters_per_sentence": [
-            average_alphanumeric_characters_per_sentence(t) for t in texts
-        ],
-        "mean_word_length": [
-            mean_word_length(t) for t in texts
-        ],
-        "max_sentence_length": [
-            max_sentence_length(t) for t in texts
-        ],
-        "min_sentence_length": [
-            min_sentence_length(t) for t in texts
-        ],
-        "ratio_symbols_to_words": [
-            average_ratio_of_symbols_to_words(t) for t in texts
-        ],
-        "ratio_stopwords_to_non_stopwords": [
-            average_ratio_of_stopwords_to_non_stopwords(t) for t in texts
-        ],
-        "avg_sentence_length": [
-            average_sentence_length(t) for t in texts
-        ],
-        "avg_character_repetition_ratio_per_sentence": [
-            average_character_repetition_ratio_per_sentence(t) for t in texts
-        ],
-        "avg_word_repetition_ratio_per_sentence": [
-            average_word_repetition_ratio_per_sentence(t) for t in texts
-        ],
-    }
+        # --------------------------------------------------------------
+        # NEW METRICS (stored per document)
+        # --------------------------------------------------------------
+        record["heuristics"] = {
+            "num_lorem_ipsum_sentences":
+                count_lorem_ipsum_sentences(text),
+            "num_sentences_ending_with_ellipsis":
+                count_sentences_ending_with_ellipsis(text),
+            "num_sentences_starting_with_bullet":
+                count_sentences_starting_with_bullet(text),
+            "num_sentences_without_terminal_punctuation":
+                count_sentences_without_terminal_punctuation(text),
+            "num_sentences_with_curly_bracket":
+                count_sentences_with_curly_bracket(text),
+            "num_sentences_with_legal_phrases":
+                count_sentences_with_legal_phrases(text),
+            "num_sentences_low_guarani_ratio":
+                count_sentences_with_low_guarani_proportion(text),
+            "num_sentences_with_javascript":
+                count_sentences_with_javascript(text),
+            "avg_words_in_capitalized_sentences":
+                average_words_in_sentences_starting_with_capital(text),
+            "num_bad_words_occurrences":
+                count_bad_words_occurrences(text),
+        }
 
-    # Document-level metrics
-    document_metrics = {
-        "avg_sentences_per_document": average_sentences_per_document(texts),
-        "min_sentences_per_document": min_sentences_per_document(texts),
-        "max_sentences_per_document": max_sentences_per_document(texts),
-    }
+        processed_records.append(record)
 
-    return {
-        "sentence_metrics": sentence_metrics,
-        "document_metrics": document_metrics,
-    }
+    # --------------------------------------------------------------
+    # PRINT OLD METRICS ONCE (corpus-level)
+    # --------------------------------------------------------------
+    print("Old heuristic metrics (corpus-level):")
+    for key, values in old_metrics.items():
+        if values:
+            print(f"  {key}: {sum(values) / len(values)}")
 
+    write_jsonl(output_path, processed_records)
 
 # ---------------------------------------------------------------------
-# MAIN
+# ENTRY POINT
 # ---------------------------------------------------------------------
 
 def main():
-    for jsonl_file in DATA_DIR.glob("*.jsonl"):
-        print(f"\nProcessing corpus: {jsonl_file.name}")
-        results = run_on_file(jsonl_file)
+    for jsonl_file in RAW_DIR.glob("*.jsonl"):
+        output_file = PROCESSED_DIR / jsonl_file.name
+        process_file(jsonl_file, output_file)
 
-        if not results:
-            print("No valid texts found.")
-            continue
-
-        print("Sentence-level metrics (per document):")
-        for k, v in results["sentence_metrics"].items():
-            print(f"  {k}: {v}")
-
-        print("Document-level metrics:")
-        for k, v in results["document_metrics"].items():
-            print(f"  {k}: {v}")
-
+    print("\n✔ Finished.")
+    print("✔ Processed documents written to data/processed")
 
 if __name__ == "__main__":
     main()

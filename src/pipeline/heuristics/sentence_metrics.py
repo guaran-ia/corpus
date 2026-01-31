@@ -5,10 +5,7 @@ Sentence-level and document-level heuristic metrics.
 from typing import List
 from pathlib import Path
 import spacy
-
 from .tokenization import tokenize
-
-
 
 # ---------------------------------------------------------------------
 # NLP INITIALIZATION (sentence segmentation only)
@@ -47,7 +44,34 @@ def sentences(text: str) -> List[str]:
 
 def words(text: str) -> List[str]:
     return list(tokenize(text))
+BAD_WORDS_PATH = Path(__file__).parent / "bad_words.txt"
 
+
+def load_bad_words() -> list[str]:
+    with BAD_WORDS_PATH.open(encoding="utf-8") as f:
+        return [
+            line.strip().lower()
+            for line in f
+            if line.strip() and not line.startswith("#")
+        ]
+
+
+BAD_WORDS = load_bad_words()
+
+# sentence_metrics.py (arriba del archivo)
+
+try:
+    from src.pipeline.language_identifier.language_identifier import LanguageIdentifier
+
+    _LANGID = LanguageIdentifier(
+        fasttext=True,
+        glotlid=True,
+        openlid=True,
+    )
+except ImportError:
+    _LANGID = None
+
+GUARANI_CODES = {"gn", "gug", "grn"}
 
 # ---------------------------------------------------------------------
 # CHARACTER-LEVEL HELPERS
@@ -225,3 +249,167 @@ def max_sentences_per_document(texts: List[str]) -> int:
     counts = sentence_counts_per_document(texts)
     return max(counts) if counts else 0
 
+# --------------------------------------------------
+# New heuristic
+# --------------------------------------------------
+
+def count_lorem_ipsum_sentences(text: str) -> int:
+    """
+    Count the number of sentences that contain the placeholder
+    phrase 'lorem ipsum'.
+    """
+    return sum(
+        1
+        for sentence in sentences(text)
+        if "lorem ipsum" in sentence.lower()
+    )
+def count_sentences_ending_with_ellipsis(text: str) -> int:
+    """
+    Count the number of sentences that end with ellipsis (...).
+    """
+    return sum(
+        1
+        for sentence in sentences(text)
+        if sentence.rstrip().endswith("...")
+    )
+def count_sentences_starting_with_bullet(text: str) -> int:
+    """
+    Count the number of sentences that start with a bullet point.
+    """
+    bullet_chars = ("-", "•", "*", "–", "—")
+
+    return sum(
+        1
+        for sentence in sentences(text)
+        if sentence.lstrip().startswith(bullet_chars)
+    )
+def count_sentences_without_terminal_punctuation(text: str) -> int:
+    """
+    Count sentences that do not end with terminal punctuation.
+    """
+    terminal_punctuation = (".", "!", "?", "\"", "”", "’", "»")
+
+    count = 0
+    for sentence in sentences(text):
+        s = sentence.rstrip()
+        if not s:
+            continue
+
+        if not s.endswith(terminal_punctuation):
+            count += 1
+
+    return count
+def count_sentences_with_curly_bracket(text: str) -> int:
+    """
+    Count sentences that contain a curly bracket '{',
+    which may indicate programming source code.
+    """
+    count = 0
+    for sentence in sentences(text):
+        if "{" in sentence:
+            count += 1
+    return count
+
+LEGAL_PHRASES = [
+    # English
+    "terms of use",
+    "privacy policy",
+    "cookie policy",
+    "uses cookies",
+    "use of cookies",
+    "use cookies",
+
+    # Spanish
+    "términos de uso",
+    "politica de privacidad",
+    "política de privacidad",
+    "politica de cookies",
+    "política de cookies",
+    "usa cookies",
+    "uso de cookies",
+]
+
+def count_sentences_with_legal_phrases(text: str) -> int:
+    """
+    Count sentences that contain legal or cookie-related phrases.
+    """
+    count = 0
+    for sentence in sentences(text):
+        s = sentence.lower()
+        if any(phrase in s for phrase in LEGAL_PHRASES):
+            count += 1
+    return count
+
+
+
+
+def count_sentences_with_javascript(text: str) -> int:
+    """
+    Count sentences that contain the word 'JavaScript' or 'Javascript'.
+    """
+    count = 0
+
+    for sentence in sentences(text):
+        s = sentence.lower()
+        if "javascript" in s:
+            count += 1
+
+    return count
+def average_words_in_sentences_starting_with_capital(text: str) -> float:
+    """
+    Compute the average number of words in sentences that start
+    with a capital letter.
+    """
+    word_counts = []
+
+    for sentence in sentences(text):
+        stripped = sentence.lstrip()
+
+        if not stripped:
+            continue
+
+        first_char = stripped[0]
+
+        if first_char.isupper():
+            words_in_sentence = len(words(sentence))
+            if words_in_sentence > 0:
+                word_counts.append(words_in_sentence)
+
+    return sum(word_counts) / len(word_counts) if word_counts else 0.0
+def count_bad_words_occurrences(text: str) -> int:
+    """
+    Count the number of occurrences of bad words/phrases
+    in a document, based on a predefined list.
+    """
+    text_lower = text.lower()
+    count = 0
+
+    for phrase in BAD_WORDS:
+        count += text_lower.count(phrase)
+
+    return count
+def count_sentences_with_low_guarani_proportion(
+    text: str,
+    threshold: float = 0.7,
+) -> int:
+    """
+    Count sentences whose proportion of Guarani is below a given threshold.
+    """
+    if _LANGID is None:
+        return 0
+
+    count = 0
+
+    for sentence in sentences(text):
+        result = _LANGID.predict(sentence)
+
+        guarani_score = sum(
+            score
+            for lang, score in result.items()
+            if lang in GUARANI_CODES
+        )
+
+        if guarani_score < threshold:
+            count += 1
+
+    return count
