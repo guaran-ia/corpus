@@ -88,12 +88,9 @@ def process_all(input_root: Path, out_file: Path) -> Tuple[int, int]:
     """
     Process all .jsonl files under the given root and write everything processed to a single JSONL file.
 
-    Returns (processed, extended) where:
-    - processed: total number of records read across all input .jsonl files
-    - extended: number of records that were augmented with metrics (i.e., had extractable text)
-    """
+    Returns (processed) where:
+    - processed: total number of records read across all input .jsonl files    """
     processed = 0
-    extended = 0
 
     # Rewrite fresh output on each run
     if out_file.exists():
@@ -106,8 +103,6 @@ def process_all(input_root: Path, out_file: Path) -> Tuple[int, int]:
             processed += 1
             new_rec = augment_record(rec)
             # If text could be extracted, new_rec will include metrics
-            if new_rec is not rec:
-                extended += 1
             batch.append(new_rec)
 
             # Batch flushing to avoid excessive memory usage
@@ -118,7 +113,7 @@ def process_all(input_root: Path, out_file: Path) -> Tuple[int, int]:
         if batch:
             append_jsonl(out_file, batch)
 
-    return processed, extended
+    return processed
 # ---------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------
@@ -126,11 +121,9 @@ def process_all(input_root: Path, out_file: Path) -> Tuple[int, int]:
 def main():
     print(f"Processing: {DATA_DIR}")
     print(f"Writing consolidated output to: {OUTPUT_DIR}")
-    processed, extended = process_all(DATA_DIR, OUTPUT_DIR)
+    processed = process_all(DATA_DIR, OUTPUT_DIR)
     print("\nSummary:")
     print(f"Total processed: {processed}")
-    print(f"Total extended: {extended}")
-
 
 if __name__ == "__main__":
     main()
