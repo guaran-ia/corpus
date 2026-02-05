@@ -25,6 +25,10 @@ from .sentence_metrics import (
 # ---------------------------------------------------------------------
 
 DATA_DIR = Path("data/raw")
+PROCESSED_DIR = Path("data/processed")
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+REPORT_PATH = Path("data/reports/document_metrics_report.json")
+REPORT_PATH.parent.mkdir(parents=True, exist_ok=True) 
 
 # ---------------------------------------------------------------------
 # HELPERS
@@ -68,11 +72,10 @@ def run_on_file(path: Path) -> dict:
     Run all heuristics on a single corpus file.
     """
     texts = []
-    temp_path = path.with_suffix(path.suffix + ".tmp")
+    output_path = PROCESSED_DIR / path.name
 
     with path.open("r", encoding="utf-8") as infile, \
-         temp_path.open("w", encoding="utf-8") as outfile:
-
+        output_path.open("w", encoding="utf-8") as outfile:
         for line in infile:
             if not line.strip():
                 continue
@@ -80,14 +83,12 @@ def run_on_file(path: Path) -> dict:
             record = json.loads(line)
             text = extract_text(record)
             if text:
-                record["sentence_metrics"] = compute_metrics_for_text(text)
+                metrics = compute_metrics_for_text(text)
+                record.update(metrics)
                 texts.append(text)
             else:
-                record["sentence_metrics"] = {}
-
+                pass
             outfile.write(json.dumps(record, ensure_ascii=False) + "\n")
-
-    temp_path.replace(path)
 
     document_metrics = {
         "avg_sentences_per_document": average_sentences_per_document(texts),
@@ -95,7 +96,10 @@ def run_on_file(path: Path) -> dict:
         "max_sentences_per_document": max_sentences_per_document(texts),
     }
 
-    return {"document_metrics": document_metrics}
+    return {
+        "corpus": path.stem,
+        "document_metrics": document_metrics,
+    }
 
 
 # ---------------------------------------------------------------------
@@ -103,6 +107,7 @@ def run_on_file(path: Path) -> dict:
 # ---------------------------------------------------------------------
 
 def main():
+    reports = []
     for jsonl_file in DATA_DIR.glob("*.jsonl"):
         print(f"\nProcessing corpus: {jsonl_file.name}")
         results = run_on_file(jsonl_file)
@@ -110,14 +115,15 @@ def main():
         if not results:
             print("No valid texts found.")
             continue
-
-        # print("Sentence-level metrics (per document):")
-        # for k, v in results["sentence_metrics"].items():
-        #     print(f"  {k}: {v}")
+        reports.append(results)
 
         print("Document-level metrics:")
         for k, v in results["document_metrics"].items():
             print(f"  {k}: {v}")
+    with REPORT_PATH.open("w", encoding="utf-8") as f:
+        json.dump(reports, f, ensure_ascii=False, indent=2)
+
+    print(f"\nDocument metrics report saved to: {REPORT_PATH}")
 
 
 if __name__ == "__main__":

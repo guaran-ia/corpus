@@ -1,0 +1,314 @@
+[
+  {
+    "corpus": "joff+",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.1350230414746543,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 6
+    }
+  },
+  {
+    "corpus": "hplt-3",
+    "document_metrics": {
+      "avg_sentences_per_document": 46.481295480168086,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 31282
+    }
+  },
+  {
+    "corpus": "glot500",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.5276830614497732,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 129
+    }
+  },
+  {
+    "corpus": "smolsent__en_gn",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0092699884125145,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 4
+    }
+  },
+  {
+    "corpus": "tatoeba",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.022869022869023,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 4
+    }
+  },
+  {
+    "corpus": "bible",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.5560084144096766,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 7
+    }
+  },
+  {
+    "corpus": "gua_spa",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.202,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 7
+    }
+  },
+  {
+    "corpus": "mala-monolingual-split",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.5857605177993528,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 6
+    }
+  },
+  {
+    "corpus": "jofun",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.1373507057546146,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 6
+    }
+  },
+  {
+    "corpus": "orembae",
+    "document_metrics": {
+      "avg_sentences_per_document": 7.104477611940299,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 22
+    }
+  },
+  {
+    "corpus": "udhr-lid",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.6639344262295082,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 8
+    }
+  },
+  {
+    "corpus": "opus-all-en",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0467663121586663,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 18
+    }
+  },
+  {
+    "corpus": "FinePDF",
+    "document_metrics": {
+      "avg_sentences_per_document": 286.75935828877004,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 44500
+    }
+  },
+  {
+    "corpus": "opus-all-es",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0046071154338367,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 3
+    }
+  },
+  {
+    "corpus": "josa",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.5797765683185334,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 18
+    }
+  },
+  {
+    "corpus": "belele",
+    "document_metrics": {
+      "avg_sentences_per_document": 2.546666666666667,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 12
+    }
+  },
+  {
+    "corpus": "americasnlp2024",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0584219688476928,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 40
+    }
+  },
+  {
+    "corpus": "madlad400",
+    "document_metrics": {
+      "avg_sentences_per_document": 39.12098471675666,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 2746
+    }
+  },
+  {
+    "corpus": "americasnlp2022",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 1
+    }
+  },
+  {
+    "corpus": "culturax",
+    "document_metrics": {
+      "avg_sentences_per_document": 2.888888888888889,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 8
+    }
+  },
+  {
+    "corpus": "Alpaca-gn-gpt3.5",
+    "document_metrics": {
+      "avg_sentences_per_document": 4.1827696482217265,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 68
+    }
+  },
+  {
+    "corpus": "jojajovai",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0374331550802138,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 15
+    }
+  },
+  {
+    "corpus": "apollomoedataset",
+    "document_metrics": {
+      "avg_sentences_per_document": 17.09488807216839,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 2528
+    }
+  },
+  {
+    "corpus": "grammar",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0000035991678724,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 2
+    }
+  },
+  {
+    "corpus": "gn-multi-affective-alpaca",
+    "document_metrics": {
+      "avg_sentences_per_document": 2.3005925659903035,
+      "min_sentences_per_document": 2,
+      "max_sentences_per_document": 8
+    }
+  },
+  {
+    "corpus": "opus",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.0,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 1
+    }
+  },
+  {
+    "corpus": "fineweb-2",
+    "document_metrics": {
+      "avg_sentences_per_document": 12.582373284578276,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 2255
+    }
+  },
+  {
+    "corpus": "moscar",
+    "document_metrics": {
+      "avg_sentences_per_document": 15.397058823529411,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 189
+    }
+  },
+  {
+    "corpus": "commonvoice",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.002599935001625,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 3
+    }
+  },
+  {
+    "corpus": "ancora",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.011543909348442,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 5
+    }
+  },
+  {
+    "corpus": "americasnlp2023",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.023976023976024,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 7
+    }
+  },
+  {
+    "corpus": "guarania-scraped",
+    "document_metrics": {
+      "avg_sentences_per_document": 7.546547729379054,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 2210
+    }
+  },
+  {
+    "corpus": "cc100_gn",
+    "document_metrics": {
+      "avg_sentences_per_document": 2.256045847305761,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 130
+    }
+  },
+  {
+    "corpus": "Alpaca-gn-gpt4",
+    "document_metrics": {
+      "avg_sentences_per_document": 7.90791583747126,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 75
+    }
+  },
+  {
+    "corpus": "flores-200",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.1306081754735793,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 5
+    }
+  },
+  {
+    "corpus": "americasnli",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.035678391959799,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 5
+    }
+  },
+  {
+    "corpus": "multi-wiki-qa",
+    "document_metrics": {
+      "avg_sentences_per_document": 37.73175257731959,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 552
+    }
+  },
+  {
+    "corpus": "joemo",
+    "document_metrics": {
+      "avg_sentences_per_document": 1.124124761298536,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 5
+    }
+  },
+  {
+    "corpus": "apollomoebench",
+    "document_metrics": {
+      "avg_sentences_per_document": 4.679389312977099,
+      "min_sentences_per_document": 1,
+      "max_sentences_per_document": 11
+    }
+  }
+]
