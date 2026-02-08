@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
-from typing import Dict
+from typing import Dict, List
+from statistics import mean
 from .sentence_metrics import (
     average_uppercase_letters_per_sentence,
     average_numbers_per_sentence,
@@ -50,7 +51,7 @@ def extract_text(record: dict) -> str:
             return record[key]
     return ""
 
-def compute_metrics_for_text(text: str) -> Dict[str, float]:
+def compute_metrics(text: str) -> Dict[str, float]:
     """Compute all the requested metrics for a text."""
     return {
         "avg_uppercase_letters_per_sentence": average_uppercase_letters_per_sentence(text),
@@ -67,11 +68,24 @@ def compute_metrics_for_text(text: str) -> Dict[str, float]:
         "avg_character_repetition_ratio_per_sentence": average_character_repetition_ratio_per_sentence(text),
         "avg_word_repetition_ratio_per_sentence": average_word_repetition_ratio_per_sentence(text),
     }
-def run_on_file(path: Path) -> dict:
+
+def average_metrics_over_documents(metrics_list: List[Dict[str, float]]) -> Dict[str, float]:
+    """
+    Computes the average of each metric across all documents in the corpus.
+    
+    """
+    if not metrics_list:
+        return {}
+    keys = metrics_list[0].keys()
+    return {k: mean(m[k] for m in metrics_list) for k in keys}
+
+
+def process_file(path: Path) -> dict:
     """
     Run all heuristics on a single corpus file.
     """
-    texts = []
+    texts: List[str] = []
+    per_doc_metrics: List[Dict[str, float]] = []
     output_path = PROCESSED_DIR / path.name
 
     with path.open("r", encoding="utf-8") as infile, \
@@ -83,9 +97,10 @@ def run_on_file(path: Path) -> dict:
             record = json.loads(line)
             text = extract_text(record)
             if text:
-                metrics = compute_metrics_for_text(text)
+                metrics = compute_metrics(text)
                 record.update(metrics)
                 texts.append(text)
+                per_doc_metrics.append(metrics)
             else:
                 pass
             outfile.write(json.dumps(record, ensure_ascii=False) + "\n")
@@ -96,9 +111,14 @@ def run_on_file(path: Path) -> dict:
         "max_sentences_per_document": max_sentences_per_document(texts),
     }
 
+    # Average metrics per document within the corpus
+    avg_metrics_per_document = average_metrics_over_documents(per_doc_metrics)
+
     return {
         "corpus": path.stem,
         "document_metrics": document_metrics,
+        "sentence_metrics": avg_metrics_per_document,
+        "documents_count": len(per_doc_metrics),
     }
 
 
@@ -110,9 +130,9 @@ def main():
     reports = []
     for jsonl_file in DATA_DIR.glob("*.jsonl"):
         print(f"\nProcessing corpus: {jsonl_file.name}")
-        results = run_on_file(jsonl_file)
+        results = process_file(jsonl_file)
 
-        if not results:
+        if not results or results.get("documents_count", 0) == 0:
             print("No valid texts found.")
             continue
         reports.append(results)
@@ -120,6 +140,12 @@ def main():
         print("Document-level metrics:")
         for k, v in results["document_metrics"].items():
             print(f"  {k}: {v}")
+
+        if results.get("average_metrics_per_document"):
+            print("Average metrics per document:")
+            for k, v in results["average_metrics_per_document"].items():
+                print(f"  {k}: {v}")
+
     with REPORT_PATH.open("w", encoding="utf-8") as f:
         json.dump(reports, f, ensure_ascii=False, indent=2)
 
