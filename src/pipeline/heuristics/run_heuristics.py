@@ -69,7 +69,7 @@ def compute_metrics(text: str) -> Dict[str, float]:
         "avg_word_repetition_ratio_per_sentence": average_word_repetition_ratio_per_sentence(text),
     }
 
-def average_metrics_over_documents(metrics_list: List[Dict[str, float]]) -> Dict[str, float]:
+def compute_metrics_corpus(metrics_list: List[Dict[str, float]]) -> Dict[str, float]:
     """
     Computes the average of each metric across all documents in the corpus.
     
@@ -112,7 +112,7 @@ def process_file(path: Path) -> dict:
     }
 
     # Average metrics per document within the corpus
-    avg_metrics_per_document = average_metrics_over_documents(per_doc_metrics)
+    avg_metrics_per_document = compute_metrics_corpus(per_doc_metrics)
 
     return {
         "corpus": path.stem,
