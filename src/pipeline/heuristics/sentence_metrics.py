@@ -1,6 +1,7 @@
 """
 Sentence-level and document-level heuristic metrics.
 """
+from .utils import normalize_guarani
 import unicodedata
 import re
 from typing import List
@@ -375,33 +376,17 @@ def average_words_in_sentences_starting_with_capital(text: str) -> float:
     return sum(word_counts) / len(word_counts) if word_counts else 0.0
 
 
+
 def count_bad_words_occurrences(text: str) -> int:
     """
     Count the number of occurrences of bad words or phrases
-    in a document, allowing approximate matching by normalizing
-    Guaraní orthographic variants (diacritics and glottal stop).
+    using orthographic normalization for Guaraní.
     """
-
-    def normalize(text: str) -> str:
-        # Unicode normalization: separate base characters and diacritics
-        text = unicodedata.normalize("NFD", text)
-
-        # Remove diacritics (acute accents and nasal tildes)
-        text = "".join(
-            ch for ch in text
-            if unicodedata.category(ch) != "Mn"
-        )
-
-        # Remove glottal stop apostrophes (ʼ, ’, ')
-        text = re.sub(r"[ʼ’']", "", text)
-
-        return text.lower()
-
-    normalized_text = normalize(text)
+    normalized_text = normalize_guarani(text)
     count = 0
 
     for phrase in BAD_WORDS:
-        normalized_phrase = normalize(phrase)
+        normalized_phrase = normalize_guarani(phrase)
         count += normalized_text.count(normalized_phrase)
 
     return count
