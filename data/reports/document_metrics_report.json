@@ -934,5 +934,29 @@
       "avg_word_repetition_ratio_per_sentence": 0.044795374568001395
     },
     "documents_count": 262
+  }, 
+  {
+    "corpus": "coreguapa_identified_gn",
+    "document_metrics": {
+      "avg_sentences_per_document": 1111.439393939394,
+      "min_sentences_per_document": 25,
+      "max_sentences_per_document": 4830
+    },
+    "sentence_metrics": {
+      "avg_uppercase_letters_per_sentence": 3.5297738387745636,
+      "avg_numbers_per_sentence": 0.5451274075976523,
+      "avg_words_per_sentence": 13.82228666423664,
+      "avg_characters_per_sentence": 95.63046971754798,
+      "avg_alphanumeric_characters_per_sentence": 78.6780883238831,
+      "mean_word_length": 5.385333937327594,
+      "avg_sentence_length": 13.82228666423664,
+      "max_sentence_length": 158.22727272727272,
+      "min_sentence_length": 0.3333333333333333,
+      "ratio_symbols_to_words": 0.39752228513435983,
+      "ratio_stopwords_to_non_stopwords": 0.14934910115099695,
+      "avg_character_repetition_ratio_per_sentence": 0.5186013870038749,
+      "avg_word_repetition_ratio_per_sentence": 0.04629849167310212
+    },
+    "documents_count": 66
   }
 ]
