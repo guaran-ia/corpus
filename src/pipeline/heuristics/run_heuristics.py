@@ -31,8 +31,8 @@ from .sentence_metrics import (
     max_sentences_per_document,
 )
 
-RAW_DIR = Path("data/raw2")
-PROCESSED_DIR = Path("data/processed2")
+RAW_DIR = Path("data/raw")
+PROCESSED_DIR = Path("data/processed")
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 REPORT_PATH = Path("data/reports/document_metrics_report.json")
 REPORT_PATH.parent.mkdir(parents=True, exist_ok=True) 
