@@ -171,3 +171,5 @@ cython_debug/
 .pypirc
 
 src/pipeline/language_identifier/models
+
+.vscode/
