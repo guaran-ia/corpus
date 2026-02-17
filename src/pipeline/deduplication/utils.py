@@ -68,7 +68,7 @@ def canonicalize_text(text: str, replace_separators: bool = True,
     # with a single space
     if replace_separators:
         can_text = ''.join(
-            '' 
+            ' ' 
             if unicodedata.category(char).startswith('Z') else char for char in can_text
         )
     # Remove punctuation characters (commas, periods, dashes, quotes, apostrophes, etc.)
