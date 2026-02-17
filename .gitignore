@@ -173,3 +173,5 @@ cython_debug/
 src/pipeline/language_identifier/models
 
 .vscode/
+
+.DS_Store
