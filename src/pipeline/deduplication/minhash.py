@@ -10,9 +10,6 @@ from .utils import canonicalize_text
 from ..tokenization import tokenize
 
 
-SIMILARITY_THRESHOLD = 0.8
-NUM_PERMS = 128
-
 
 def get_shingles(text: str, size: int = 5) -> set[str]:
     """
@@ -27,12 +24,6 @@ def get_shingles(text: str, size: int = 5) -> set[str]:
                   sequence of SHINGLE_SIZE tokens. If the text contains fewer
                   tokens than SHINGLE_SIZE, returns a set containing a single
                   shingle with all tokens joined by spaces.
-    
-    Example:
-        >>> text = "The quick brown fox jumps over the lazy dog"
-        >>> shingles = get_shingles(text, size=5)
-        >>> # Returns shingles like: {"The quick brown fox jumps", 
-        >>> #                        "quick brown fox jumps over", ...}
     """
     shingles = set()
     text_list = list(tokenize(text))
@@ -44,7 +35,33 @@ def get_shingles(text: str, size: int = 5) -> set[str]:
     return shingles
 
 
-def read_corpora(corpora_dir):
+def read_corpora(corpora_dir: str) -> list[dict]:
+    """
+    Read and aggregate corpus files from a directory, with caching support.
+    
+    This function reads JSONL files from the specified directory and aggregates them
+    into a single corpora list. If a 'raw_corpora.jsonl' cache file already exists,
+    it reads from the cache instead of re-processing all files. Each record is
+    augmented with a unique ID and duplicate tracking metadata.
+    
+    Args:
+        corpora_dir (str): Path to the directory containing corpus JSONL files.
+                          The function will look for .jsonl files and optionally
+                          use a cached 'raw_corpora.jsonl' file.
+    
+    Returns:
+        list[dict]: A list of document dictionaries, where each dictionary contains:
+                    - 'text' (str): The document text content.
+                    - 'id' (str): Unique identifier in format 'corpus_name_line_number'.
+                    - 'duplicate' (dict): Metadata tracking duplicate status and related docs.
+                    - Other fields from the original JSONL record.
+    
+    Notes:
+        - Empty text records are skipped with a warning message.
+        - The function creates a 'raw_corpora.jsonl' cache file for faster
+          subsequent reads.
+        - Progress bar shown during corpus reading via tqdm.
+    """
     raw_corpora_path = os.path.join(corpora_dir, 'raw_corpora.jsonl')
     if not os.path.exists(raw_corpora_path):
         corpora = []
@@ -63,7 +80,6 @@ def read_corpora(corpora_dir):
                     else:
                         print(f'Warning: Empty text in {corpus_name} at line {i}')
             corpora.extend(corpus)
-            print(f'Finished processing {corpus_name}, which has {len(corpus)} documents')
         # save raw corpora to jsonl file
         with open(raw_corpora_path, 'w', encoding='utf-8') as f:
             for record in corpora:
@@ -79,11 +95,37 @@ def read_corpora(corpora_dir):
     return corpora
 
 
-def compute_minhash_row(row):
+def compute_minhash_row(row: dict, num_perm: int) -> dict:
+    """
+    Compute MinHash signature and shingles for a single document.
+    
+    This function processes a document record by canonicalizing its text,
+    extracting shingles (n-grams), and computing a MinHash signature.
+    The MinHash signature is used for efficient duplicate detection via LSH.
+    
+    Args:
+        row (dict): A document dictionary with at least the following keys:
+                    - 'id' (str): Unique document identifier.
+                    - 'text' (str): Document text content.
+    
+    Returns:
+        dict: A dictionary containing:
+              - 'id' (str): Document identifier (from input).
+              - 'text' (str): Original document text.
+              - 'minhash' (datasketch.MinHash): Computed MinHash signature with NUM_PERMS hash functions.
+              - 'shingles' (list[str]): List of shingles (space-separated token n-grams).
+    
+    Notes:
+        - Text is first canonicalized (normalized, lowercased, punctuation removed).
+        - Shingles are extracted from canonicalized text with size SHINGLE_SIZE.
+        - MinHash is computed using all shingles; each shingle is encoded as UTF-8
+          before hashing.
+        - Used in parallel processing for efficient batch computation.
+    """
     text = row['text'] 
     can_text = canonicalize_text(text)
     shingles = get_shingles(can_text)
-    text_minhash = MinHash(num_perm=NUM_PERMS)
+    text_minhash = MinHash(num_perm=num_perm)
     for shingle in shingles:
         text_minhash.update(shingle.encode('utf-8'))
     return {
@@ -94,13 +136,40 @@ def compute_minhash_row(row):
     }
 
 
-def compute_minhash(corpora, dedup_dir):
+def compute_minhash(corpora: list[dict], dedup_dir: str, num_perm: int) -> list[dict]:
+    """
+    Compute MinHash signatures for all documents using parallel processing.
+    
+    This function processes a list of documents in parallel to compute MinHash signatures
+    and extract shingles for each document. Results are saved to a JSON file and returned.
+    Parallelization uses multiprocessing.Pool for efficient CPU utilization.
+    
+    Args:
+        corpora (list[dict]): List of document dictionaries, each with at least:
+                              - 'id' (str): Unique document identifier.
+                              - 'text' (str): Document text content.
+        dedup_dir (str): Directory path where the 'minhash.json' output file will be saved.
+    
+    Returns:
+        list[dict]: List of processed document dictionaries, each containing:
+                    - 'id' (str): Document identifier.
+                    - 'text' (str): Original document text.
+                    - 'minhash' (datasketch.MinHash): Computed MinHash signature.
+                    - 'shingles' (list[str]): Extracted shingles from the document.
+    
+    Notes:
+        - Uses multiprocessing.Pool with (cpu_count - 1) workers for parallelization.
+        - Falls back to 1 worker if cpu_count() returns None.
+        - Progress tracked via tqdm bar during processing.
+        - MinHash signatures are excluded from JSON output (not JSON-serializable).
+        - Output JSON file contains one record per line (JSONL format).
+    """
     u_corpora = []
     cpu_count = os.cpu_count()
     num_workers = max(1, (cpu_count - 1) if cpu_count else 1)
     with Pool(num_workers) as pool:
         u_corpora = list(tqdm(
-            pool.imap_unordered(compute_minhash_row, [doc for doc in corpora]), 
+            pool.imap_unordered(lambda doc: compute_minhash_row(doc, num_perm), [doc for doc in corpora]), 
             total=len(corpora), 
             desc='Computing MinHash'
         ))
@@ -113,8 +182,35 @@ def compute_minhash(corpora, dedup_dir):
     return u_corpora
 
 
-def compute_lsh(corpora, dedup_dir):
-    lsh = MinHashLSH(threshold=SIMILARITY_THRESHOLD, num_perm=NUM_PERMS)
+def compute_lsh(corpora: list[dict], dedup_dir: str, similarity_threshold: float=0.8, num_perm: int=128) -> MinHashLSH:
+    """
+    Build a Locality-Sensitive Hashing (LSH) index from document MinHash signatures.
+    
+    This function constructs an LSH index by inserting MinHash signatures from all
+    documents. LSH allows efficient approximate nearest-neighbor queries to find
+    similar documents without comparing every pair. The index is saved to disk as
+    a pickle file.
+    
+    Args:
+        corpora (list[dict]): List of document dictionaries, each containing:
+                              - 'id' (str): Unique document identifier.
+                              - 'minhash' (datasketch.MinHash): Precomputed MinHash signature.
+        dedup_dir (str): Directory path where the 'lsh.pkl' index file will be saved.
+        similarity_threshold (float): Jaccard similarity threshold for LSH (default 0.8).
+        num_perm (int): Number of permutations (hash functions) used in MinHash (default
+    
+    Returns:
+        MinHashLSH: The constructed LSH index that can be queried to find candidate
+                    duplicate documents. The index uses similarity_threshold and num_perm
+                    as configuration parameters.
+    
+    Notes:
+        - Uses similarity_threshold and num_perm parameters for LSH configuration.
+        - Progress tracked via tqdm bar during index construction.
+        - check_duplication is set to False for efficiency (no deduplication during insert).
+        - The index is persisted to disk via pickle serialization.
+    """
+    lsh = MinHashLSH(threshold=similarity_threshold, num_perm=num_perm)
     for doc in tqdm(corpora, desc='Building LSH'):
         lsh.insert(doc['id'], doc['minhash'], check_duplication=False)
     lsh_path = os.path.join(dedup_dir, 'lsh.pkl')
@@ -125,12 +221,38 @@ def compute_lsh(corpora, dedup_dir):
     return lsh
 
 
-def find_duplicates(corpora, lsh):
+def find_duplicates(corpora: list[dict], lsh: MinHashLSH, num_perm: int) -> dict[str, list[str]]:
+    """
+    Find candidate duplicate documents using LSH index queries.
+    
+    This function queries the LSH index for each document to retrieve candidate
+    duplicates. Each document's MinHash signature is recomputed from its shingles
+    and used to query the index for similar documents.
+    
+    Args:
+        corpora (list[dict]): List of document dictionaries, each containing at least:
+                              - 'id' (str): Unique document identifier.
+                              - 'shingles' (list[str]): Precomputed list of shingles.
+        lsh (MinHashLSH): Precomputed LSH index for similarity queries.
+        num_perm (int): Number of permutations (hash functions) used in MinHash.
+                        Must match the value used in lsh construction.
+    
+    Returns:
+        dict[str, list[str]]: Dictionary mapping document IDs to lists of candidate
+                              duplicate document IDs. Self-duplicates (id matching itself)
+                              are excluded from results.
+    
+    Notes:
+        - Progress tracked via tqdm bar during query execution.
+        - MinHash signatures are recomputed for each document during query.
+        - LSH queries return approximate nearest neighbors (candidates), not exact duplicates.
+        - Exact duplicate verification requires additional similarity computation (Jaccard).
+    """
     dup_dict = {}
     for doc in tqdm(corpora, desc='Finding duplicates'):
         id = doc['id']
         shingles = doc['shingles']
-        text_minhash = MinHash(num_perm=NUM_PERMS)
+        text_minhash = MinHash(num_perm=num_perm)
         for shingle in shingles:
             text_minhash.update(shingle.encode('utf-8'))
         dups = lsh.query(text_minhash)
@@ -139,29 +261,105 @@ def find_duplicates(corpora, lsh):
     return dup_dict
 
 
-def jaccard_similarity(list1, list2):
+def jaccard_similarity(list1: list[str], list2: list[str]) -> float:
+    """
+    Compute the Jaccard similarity coefficient between two lists.
+    
+    Jaccard similarity measures the overlap between two sets as the ratio of
+    intersection size to union size. It ranges from 0 (no overlap) to 1 (identical sets).
+    Used for exact duplicate verification after LSH candidate retrieval.
+    
+    Args:
+        list1 (list[str]): First list of elements (typically shingles).
+        list2 (list[str]): Second list of elements (typically shingles).
+    
+    Returns:
+        float: Jaccard similarity coefficient in range [0, 1].
+               Returns 0 if both lists are empty.
+    
+    Notes:
+        - Converts input lists to sets, so duplicates within lists are ignored.
+        - Formula: |A ∩ B| / |A ∪ B|
+        - Used to verify exact duplicate matches after LSH approximate search.
+    """
     s1 = set(list1)
     s2 = set(list2)
     return len(s1.intersection(s2)) / len(s1.union(s2)) if len(s1.union(s2)) > 0 else 0
 
 
-def create_duplication_report(num_duplicates, corpora_len, dedup_dir, shingle_size):
+def create_duplication_report(num_duplicates: int, corpora_len: int, dedup_dir: str, 
+                              shingle_size: int, num_perm: int, 
+                              similarity_threshold: float) -> None:
+    """
+    Generate and save a deduplication report with statistics and configuration.
+    
+    Creates a summary report of the deduplication process, including counts of
+    documents and duplicates found, as well as the algorithm parameters used.
+    The report is saved as a JSON file in the deduplication directory.
+    
+    Args:
+        num_duplicates (int): Total number of duplicate pairs found.
+        corpora_len (int): Total number of documents in the corpus.
+        dedup_dir (str): Directory path where the 'report.json' file will be saved.
+        shingle_size (int): Size of shingles used (number of tokens per shingle).
+        num_perm (int): Number of permutations (hash functions) used in MinHash.
+        similarity_threshold (float): Similarity threshold used for LSH queries
+                                      (range typically 0.0 to 1.0).
+    
+    Returns:
+        None. The function creates a report dictionary and saves it to disk as 'report.json'.
+    
+    Notes:
+        - Report is persisted to disk as 'report.json' in JSONL-like format.
+        - Unicode characters are preserved (ensure_ascii=False).
+        - Provides reproducibility information for the deduplication run.
+    """
     report = {
         'total_docs': corpora_len,
         'total_duplicates': num_duplicates,
-        'similarity_threshold': SIMILARITY_THRESHOLD,
-        'num_permutations': NUM_PERMS,
+        'similarity_threshold': similarity_threshold,
+        'num_permutations': num_perm,
         'shingle_size': shingle_size,
     }
     # save report to json file
     report_path = os.path.join(dedup_dir, 'report.json')
     with open(report_path, 'w', encoding='utf-8') as f:
-        json.dump(report, f, indent=4, ensure_ascii=False)
+        json.dump(report, f, indent=4)
     print_path = '/'.join(report_path.split('/')[-4:])
     print(f'Duplication report saved into {print_path}')
 
 
-def update_corpora_metadata(corpora, duplicates, data_dir):
+def update_corpora_metadata(corpora: list[dict], duplicates: list[dict], data_dir: str) -> None:
+    """
+    Update corpus documents with duplicate metadata and persist to disk.
+    
+    Augments each document in the corpora with information about its duplicates.
+    For each duplicate pair found, marks the source document as having duplicates
+    and lists the duplicate document IDs. Updated corpora are saved back to the
+    processed directory.
+    
+    Args:
+        corpora (list[dict]): List of document dictionaries, each containing:
+                              - 'id' (str): Unique document identifier.
+                              - 'duplicate' (dict): Metadata structure with nested keys
+                                'minhash'['has_duplicate'] and 'minhash'['dup_docs'].
+                              - Other document fields.
+        duplicates (list[dict]): List of duplicate pair dictionaries, each containing:
+                                 - 'id' (str): Source document ID.
+                                 - 'dup_id' (str): Duplicate document ID.
+        data_dir (str): Base data directory path. Updated corpora are saved to
+                        data_dir/processed/raw_corpora.jsonl.
+    
+    Returns:
+        None. Modifies corpora in-place and persists changes to disk.
+    
+    Notes:
+        - Creates a lookup dictionary for O(1) document access.
+        - Sets duplicate["minhash"]["has_duplicate"] = True for documents with duplicates.
+        - Stores duplicate IDs in duplicate["minhash"]["dup_docs"] field.
+        - Overwrites the raw_corpora.jsonl file with updated metadata.
+        - Unicode characters are preserved in output (ensure_ascii=False).
+    """
     corpora_lookup = {doc['id']: doc for doc in corpora}
     for dup in duplicates:
         id = dup['id']
@@ -176,21 +374,59 @@ def update_corpora_metadata(corpora, duplicates, data_dir):
     print(f'Updated corpora with duplication metadata saved into {print_path}')
 
 
-def check_duplicates(dup_dict, corpora, dedup_dir, shingle_size):
+def check_duplicates(dup_dict: dict[str, list[str]], corpora: list[dict], 
+                     dedup_dir: str, shingle_size: int, 
+                     similarity_threshold: float, num_perm: int) -> list[dict]:
+    """
+    Verify duplicate candidates using Jaccard similarity and save confirmed duplicates.
+    
+    Filters LSH approximate duplicates by computing exact Jaccard similarity between
+    candidate pairs. Only pairs exceeding the similarity threshold are marked as true
+    duplicates. Results are saved to JSON file and a summary report is generated.
+    
+    Args:
+        dup_dict (dict[str, list[str]]): Mapping of document IDs to lists of candidate
+                                         duplicate document IDs from LSH queries.
+        corpora (list[dict]): List of document dictionaries, each containing:
+                              - 'id' (str): Unique document identifier.
+                              - 'text' (str): Document text content.
+                              - 'shingles' (list[str]): Precomputed shingles.
+        dedup_dir (str): Directory path where duplicate results and report will be saved.
+        shingle_size (int): Size of shingles used (for report metadata).
+        similarity_threshold (float): Minimum Jaccard similarity (0.0-1.0) to classify
+                                      a pair as true duplicates.
+        num_perm (int): Number of MinHash permutations used (for report metadata).
+    
+    Returns:
+        list[dict]: List of verified duplicate pairs, each containing:
+                    - 'id' (str): Base document ID.
+                    - 'id_text' (str): Base document text.
+                    - 'dup_id' (str): Duplicate document ID.
+                    - 'dup_text' (str): Duplicate document text.
+                    - 'similarity' (float): Computed Jaccard similarity.
+    
+    Notes:
+        - Exact similarity computation via Jaccard on shingle sets.
+        - Saves duplicates.json and calls create_duplication_report() for summary.
+        - Unicode characters preserved in JSON output (ensure_ascii=False).
+    """
     # check jaccard similarity for each pair of duplicates
     corpora_lookup = {doc['id']: doc for doc in corpora}
     duplicates = []
+    duplicate_docs = set()
     for id, dups in tqdm(dup_dict.items(), desc='Checking duplicates'):
         if dups:
+            duplicate_docs.add(id)
             base_rec = corpora_lookup[id]
             base_text = base_rec['text']
             base_shingles = base_rec['shingles']
             for dup in dups:
+                duplicate_docs.add(dup)
                 dup_rec = corpora_lookup[dup]
                 dup_text = dup_rec['text']
                 dup_shingles = dup_rec['shingles']
                 similarity = jaccard_similarity(base_shingles, dup_shingles)
-                if similarity >= SIMILARITY_THRESHOLD:
+                if similarity >= similarity_threshold:
                     duplicates.append(
                         {
                             'id': id, 
@@ -200,18 +436,20 @@ def check_duplicates(dup_dict, corpora, dedup_dir, shingle_size):
                             'similarity': similarity
                         }
                     )
-    print(f'Total duplicates found (similarity threshold {SIMILARITY_THRESHOLD}): {len(duplicates)}')
+    print(f'Total duplicates found (similarity threshold {similarity_threshold}): \
+        {len(duplicate_docs)}')
     # save duplicates to json file
     dup_path = os.path.join(dedup_dir, 'duplicates.json')
     with open(dup_path, 'w', encoding='utf-8') as f:
         json.dump(duplicates, f, indent=4, ensure_ascii=False)
     print_path = '/'.join(dup_path.split('/')[-4:])
     print(f'Duplicates saved into {print_path}')
-    create_duplication_report(len(duplicates), len(corpora), dedup_dir, shingle_size)
+    create_duplication_report(len(duplicate_docs), len(corpora), dedup_dir, 
+                              shingle_size, num_perm, similarity_threshold)
     return duplicates
 
 
-def run_deduplication(data_dir, shingle_size=5):
+def run_deduplication(data_dir, shingle_size=5, similarity_threshold=0.8, num_perm=128):
     # create deduplication directory if it doesn't exist
     dt = datetime.now().strftime('%Y%m%d_%H%M')
     os.makedirs(os.path.join(data_dir, 'deduplication', dt), exist_ok=True)
@@ -220,15 +458,16 @@ def run_deduplication(data_dir, shingle_size=5):
     corpora_dir = os.path.join(data_dir, 'processed')
     corpora = read_corpora(corpora_dir)
     # compute minhash
-    # u_corpora = compute_minhash(corpora, dedup_dir)
+    u_corpora = compute_minhash(corpora, dedup_dir, num_perm)
     # compute lsh
-    # lsh = compute_lsh(u_corpora, dedup_dir)
+    lsh = compute_lsh(u_corpora, dedup_dir, similarity_threshold, num_perm)
     # find duplicates
-    # duplicates = find_duplicates(u_corpora, lsh)
+    duplicates = find_duplicates(u_corpora, lsh, num_perm)
     # check duplicates
-    # duplicates = check_duplicates(duplicates, u_corpora, dedup_dir, shingle_size)
+    duplicates = check_duplicates(duplicates, u_corpora, dedup_dir, shingle_size, 
+                                  similarity_threshold, num_perm)
     # update corpora metadata with duplication info
-    # update_corpora_metadata(corpora, duplicates, data_dir)
+    update_corpora_metadata(corpora, duplicates, data_dir)
     print('Deduplication has successfully completed')
 
 
