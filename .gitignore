@@ -169,9 +169,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
-
 src/pipeline/language_identifier/models
-
 .vscode/
-
 .DS_Store
+*.pkl
+*minhash.json
+*raw_corpora.jsonl
+*duplicate_details
