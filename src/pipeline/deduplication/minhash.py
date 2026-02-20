@@ -36,7 +36,7 @@ def get_shingles(text: str, size: int = 5) -> set[str]:
     return shingles
 
 
-def read_corpora(corpora_dir: str, update_corpora: bool = False) -> list[dict]:
+def read_corpora(corpora_dir: str, dedup_dir: str, update_corpora: bool = False) -> list[dict]:
     """
     Read and aggregate corpus files from a directory, with caching support.
     
@@ -63,7 +63,7 @@ def read_corpora(corpora_dir: str, update_corpora: bool = False) -> list[dict]:
           subsequent reads.
         - Progress bar shown during corpus reading via tqdm.
     """
-    raw_corpora_path = os.path.join(corpora_dir, 'raw_corpora.jsonl')
+    raw_corpora_path = os.path.join(dedup_dir, 'raw_corpora.jsonl')
     if not os.path.exists(raw_corpora_path) or update_corpora:
         corpora = []
         corpus_files = [f for f in os.listdir(corpora_dir) if os.path.isfile(os.path.join(corpora_dir, f)) and f.endswith('.jsonl')]
@@ -77,16 +77,17 @@ def read_corpora(corpora_dir: str, update_corpora: bool = False) -> list[dict]:
                     record = json.loads(line)
                     text = record.get('text', '')
                     if text:
-                        record['id'] = f'{corpus_name}_{i+1}'
                         if 'duplicate' not in record:
-                            record['duplicate'] = {'minhash': {'has_duplicate': False, 'dup_docs': []}}
+                            record['duplicate'] = {'minhash': {'has_duplicate': False}}
                         else:
-                            record['duplicate'].update({'minhash': {'has_duplicate': False, 'dup_docs': []}})
+                            record['duplicate'].update({'minhash': {'has_duplicate': False}})
                         corpus.append(record)
                         corpus_words += record['num_words_split']
                         corpus_chars += record['num_chars']
                     else:
                         print(f'Warning: Empty text in {corpus_name} at line {i}')
+            #print(f'Processing corpus: {corpus_name} with {len(corpus)} documents, '\
+            #      f'{corpus_words} words, {corpus_chars} characters')
             corpora.extend(corpus)
         # save raw corpora to jsonl file
         with open(raw_corpora_path, 'w', encoding='utf-8') as f:
@@ -100,6 +101,7 @@ def read_corpora(corpora_dir: str, update_corpora: bool = False) -> list[dict]:
         with open(raw_corpora_path, 'r', encoding='utf-8') as f:
             for line in f:
                 record = json.loads(line)
+                record['duplicate'] = {'minhash': {'has_duplicate': False}}
                 corpora.append(record)
     return corpora
 
@@ -343,7 +345,8 @@ def create_duplication_report(num_duplicates: int, corpora_len: int, dedup_dir: 
     print(f'Duplication report saved into {print_path}')
 
 
-def update_corpora_metadata(corpora: list[dict], duplicates: list[dict], data_dir: str) -> None:
+def update_corpora_metadata(corpora: list[dict], duplicates: list[dict], 
+                            data_dir: str, dedup_dir: str, corpora_dir: str) -> None:
     """
     Update corpus documents with duplicate metadata and persist to disk.
     
@@ -375,17 +378,43 @@ def update_corpora_metadata(corpora: list[dict], duplicates: list[dict], data_di
         - Unicode characters are preserved in output (ensure_ascii=False).
     """
     corpora_lookup = {doc['id']: doc for doc in corpora}
+    duplicate_docs = {}
     for dup in duplicates:
         id = dup['id']
         corpora_lookup[id]['duplicate']['minhash']['has_duplicate'] = True
-        corpora_lookup[id]['duplicate']['minhash']['dup_docs'].append(dup['dup_id'])
+        if id not in duplicate_docs:
+            duplicate_docs[id] = set()
+        duplicate_docs[id].add(dup['dup_id'])
+    
     # save updated corpora to jsonl file
-    updated_corpora_path = os.path.join(data_dir, 'processed', 'raw_corpora.jsonl')
+    updated_corpora_path = os.path.join(dedup_dir, 'raw_corpora.jsonl')
     with open(updated_corpora_path, 'w', encoding='utf-8') as f:
         for doc in corpora:
             f.write(json.dumps(doc, ensure_ascii=False) + '\n')
     print_path = '/'.join(updated_corpora_path.split('/')[-4:])
     print(f'Updated corpora with duplication metadata saved into {print_path}')
+    
+    # update each corpus file with duplication metadata
+    corpus_files = [f for f in os.listdir(corpora_dir) \
+        if os.path.isfile(os.path.join(corpora_dir, f)) and f.endswith('.jsonl')]
+    for corpus_file in tqdm(corpus_files, desc='Updating corpora with duplication metadata'):
+        corpus_name = os.path.splitext(corpus_file)[0]
+        updated_corpus_path = os.path.join(corpora_dir, corpus_file)
+        with open(updated_corpus_path, 'w', encoding='utf-8') as f:
+            docs = [doc for doc in corpora if doc['id'].startswith(f'{corpus_name}_')]
+            for doc in docs:
+                f.write(json.dumps(doc, ensure_ascii=False) + '\n')
+        print_path = '/'.join(updated_corpus_path.split('/')[-4:])
+    
+    # save duplicate docs to json file
+    dup_docs_path = os.path.join(dedup_dir, 'duplicates.json')
+    with open(dup_docs_path, 'w', encoding='utf-8') as f:
+        # convert sets to lists for JSON serialization
+        for id, dup_ids in duplicate_docs.items():
+            duplicate_docs[id] = list(dup_ids)
+        json.dump(duplicate_docs, f, indent=4, ensure_ascii=False)
+    print_path = '/'.join(dup_docs_path.split('/')[-4:])
+    print(f'Duplicate docs saved into {print_path}')
 
 
 def save_duplicates(duplicates: list[dict], dedup_dir: str, batch_size: int = 1000000) -> None:
@@ -412,7 +441,7 @@ def save_duplicates(duplicates: list[dict], dedup_dir: str, batch_size: int = 10
     Returns:
         None. Modifies corpora in-place and persists changes to disk.
     """
-    dup_dir = os.path.join(dedup_dir, 'duplicates')
+    dup_dir = os.path.join(dedup_dir, 'duplicate_details')
     os.makedirs(dup_dir, exist_ok=True)
     num_duplicates = len(duplicates)
     if num_duplicates > batch_size:
@@ -508,16 +537,20 @@ def check_duplicates(dup_dict: dict[str, list[str]], corpora: list[dict],
     return duplicates
 
 
-def execute_minhash_deduplication(data_dir, shingle_size=5, 
-                                  similarity_threshold=0.8, num_perm=128):
+def execute_minhash_deduplication(data_dir: str, output_dir: str, 
+                                  shingle_size: int=5, 
+                                  similarity_threshold: float=0.8, 
+                                  num_perm: int=128):
+    
     start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # create deduplication directory if it doesn't exist
+    os.makedirs(os.path.join(output_dir, 'deduplication'), exist_ok=True)
     dt = datetime.now().strftime('%Y%m%d_%H%M')
-    os.makedirs(os.path.join(data_dir, 'deduplication', dt), exist_ok=True)
-    dedup_dir = os.path.join(data_dir, 'deduplication', dt)
+    dedup_dir = os.path.join(output_dir, 'deduplication', dt)
+    os.makedirs(dedup_dir, exist_ok=True)
     # read corpora
     corpora_dir = os.path.join(data_dir, 'processed')
-    corpora = read_corpora(corpora_dir, update_corpora=False)
+    corpora = read_corpora(corpora_dir, dedup_dir, update_corpora=False)
     # compute minhash
     u_corpora = compute_minhash(corpora, dedup_dir, num_perm)
     # compute lsh
@@ -528,5 +561,5 @@ def execute_minhash_deduplication(data_dir, shingle_size=5,
     duplicates = check_duplicates(duplicates, u_corpora, dedup_dir, shingle_size, 
                                   similarity_threshold, num_perm, start_time)
     # update corpora metadata with duplication info
-    update_corpora_metadata(corpora, duplicates, data_dir)
+    update_corpora_metadata(corpora, duplicates, data_dir, dedup_dir, corpora_dir)
     print('Deduplication has successfully completed')
