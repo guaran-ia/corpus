@@ -545,8 +545,8 @@ def execute_minhash_deduplication(data_dir: str, output_dir: str,
     start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     # create deduplication directory if it doesn't exist
     os.makedirs(os.path.join(output_dir, 'deduplication'), exist_ok=True)
-    dt = datetime.now().strftime('%Y%m%d_%H%M')
-    dedup_dir = os.path.join(output_dir, 'deduplication', dt)
+    dt = datetime.now().strftime('%Y%m%d%H%M')
+    dedup_dir = os.path.join(output_dir, 'deduplication', f'minhash_{dt}')
     os.makedirs(dedup_dir, exist_ok=True)
     # read corpora
     corpora_dir = os.path.join(data_dir, 'processed')
