@@ -34,7 +34,7 @@ from .sentence_metrics import (
 RAW_DIR = Path("data/raw")
 PROCESSED_DIR = Path("data/processed")
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-REPORT_PATH = Path("data/reports/document_metrics_report.json")
+REPORT_PATH = Path("outputs/heuristics/doc_report.json")
 REPORT_PATH.parent.mkdir(parents=True, exist_ok=True) 
 
 def read_jsonl(path: Path):
