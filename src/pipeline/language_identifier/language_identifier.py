@@ -1,14 +1,16 @@
 import numpy as np
 from typing import Optional, List, Tuple, Dict, Any
 
-_original_array = np.array
 
+# Numpy patch to manage a backward-compatible behavior of the copy function
+# The error comes from changes introduced in NumPy 2.0, specifically around 
+# how the copy argument behaves when creating arrays.
+_original_array = np.array
 def patched_array(obj, *args, **kwargs):
     if kwargs.get('copy') is False:
         kwargs.pop('copy')  # remove strict constraint
         return np.asarray(obj)
     return _original_array(obj, *args, **kwargs)
-
 np.array = patched_array
 
 
