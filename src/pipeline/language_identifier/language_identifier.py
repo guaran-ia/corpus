@@ -1,3 +1,17 @@
+import numpy as np
+from typing import Optional, List, Tuple, Dict, Any
+
+_original_array = np.array
+
+def patched_array(obj, *args, **kwargs):
+    if kwargs.get('copy') is False:
+        kwargs.pop('copy')  # remove strict constraint
+        return np.asarray(obj)
+    return _original_array(obj, *args, **kwargs)
+
+np.array = patched_array
+
+
 import fasttext
 import os
 import pandas as pd
@@ -92,6 +106,9 @@ class LanguageIdentifier:
         Returns:
             fasttext.FastText._FastText: The loaded OpenLID model, or None if an error occurred.
         """
+        if self.models_dir_path is None:
+            print('Error loading OpenLID model: models_dir_path is not set')
+            return None
         model_path = os.path.join(self.models_dir_path, 'lid201-model.bin')
         try:
             if verbose: print(f'Loading OpenLID model from {model_path}')
@@ -267,7 +284,7 @@ class LanguageIdentifier:
         """
         
         if k > 0:
-            identification_results = {
+            identification_results: Dict[str, Optional[List[Tuple[str, float]]]] = {
                 'glotlid': None,
                 'fasttext': None,
                 'openlid': None
