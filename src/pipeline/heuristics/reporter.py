@@ -157,31 +157,34 @@ def build_markdown_report(
 
     lines.append("# Heuristics Report")
     lines.append("")
-    lines.append("## Results by corpus")
-    lines.append("")
 
-    for heuristic in HEURISTIC_KEYS:
-        lines.append(f"| Heuristic: {heuristic} | |")
-        lines.append("|---|---:|")
+    header = ["Corpus"] + HEURISTIC_KEYS
+    lines.append("| " + " | ".join(header) + " |")
+    lines.append("|" + " --- |" * len(header))
 
-        for corpus_result in sorted(corpus_results, key=lambda x: x["corpus"].lower()):
-            value = corpus_result["metrics"].get(heuristic)
+    for corpus_result in sorted(corpus_results, key=lambda x: x["corpus"].lower()):
+        row = [corpus_result["corpus"]]
+
+        for key in HEURISTIC_KEYS:
+            value = corpus_result["metrics"].get(key)
             if value is not None:
-                lines.append(f"| {corpus_result['corpus']} | {value:.6f} |")
+                row.append(f"{value:.4f}")
+            else:
+                row.append("")
 
-        lines.append("")
+        lines.append("| " + " | ".join(row) + " |")
 
-    lines.append("## Overall results")
-    lines.append("")
-    lines.append("| Heuristic | Result |")
-    lines.append("|---|---:|")
+    overall_row = ["Overall"]
 
-    for heuristic in HEURISTIC_KEYS:
-        value = overall_results.get(heuristic)
+    for key in HEURISTIC_KEYS:
+        value = overall_results.get(key)
         if value is not None:
-            lines.append(f"| {heuristic} | {value:.6f} |")
+            overall_row.append(f"{value:.4f}")
+        else:
+            overall_row.append("")
 
-    lines.append("")
+    lines.append("| " + " | ".join(overall_row) + " |")
+
     return "\n".join(lines)
 
 
