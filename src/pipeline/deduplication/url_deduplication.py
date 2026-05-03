@@ -162,11 +162,12 @@ def execute_url_deduplication(data_dir: str, output_dir: str) -> None:
                     doc_id = f"{corpus_name}_{idx}"
                     record["id"] = doc_id
 
-                record["duplicate"] = {
-                    "url": {
-                        "has_duplicate": doc_id in duplicate_ids,
-                        "docs_ids": duplicate_ids.get(doc_id, []),
-                    }
+                if "duplicate" not in record or not isinstance(record["duplicate"], dict):
+                    record["duplicate"] = {}
+
+                record["duplicate"]["url"] = {
+                    "has_duplicate": doc_id in duplicate_ids,
+                    "docs_ids": duplicate_ids.get(doc_id, []),
                 }
 
                 updated_records.append(record)
