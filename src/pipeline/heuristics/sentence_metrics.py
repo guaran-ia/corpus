@@ -391,7 +391,32 @@ def count_bad_words_occurrences(text: str) -> int:
 
     return count
 
+def _predict_language_scores(text: str) -> dict:
+    result = _LANGID.identify_languages(text, raw_output=False)
 
+    if not result or "languages" not in result:
+        return {}
+
+    languages = result["languages"]
+
+    if isinstance(languages, dict):
+        return languages
+
+    if isinstance(languages, list):
+        scores = {}
+
+        for item in languages:
+            if isinstance(item, (list, tuple)) and len(item) >= 2:
+                lang, score = item[0], item[1]
+                scores[lang] = score
+
+        return scores
+
+    if isinstance(languages, tuple) and len(languages) >= 2:
+        lang, score = languages[0], languages[1]
+        return {lang: score}
+
+    return {}
 
 def count_sentences_with_low_guarani_proportion(
     text: str,
@@ -403,7 +428,12 @@ def count_sentences_with_low_guarani_proportion(
     count = 0
 
     for sentence in sentences(text):
-        result = _LANGID.predict(sentence)
+        clean_sentence = sentence.replace("\n", " ").replace("\r", " ").strip()
+
+        if not clean_sentence:
+            continue
+
+        result = _predict_language_scores(clean_sentence)
 
         guarani_score = sum(
             score
