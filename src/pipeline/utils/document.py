@@ -22,23 +22,26 @@ class Document:
         }
 
         if include_metadata and self.metadata:
-            metadata = self.metadata
+            metadata = dict(self.metadata)
 
-            # -----------------------------
-            # Normalize metadata_fields
-            # -----------------------------
             if isinstance(metadata_fields, str):
-                metadata_fields = [metadata_fields]
+                metadata_fields = metadata_fields.strip()
 
-            # -----------------------------
-            # "*" means: include everything
-            # -----------------------------
-            if metadata_fields is not None and metadata_fields != "*":
+                if metadata_fields == "*":
+                    metadata_fields = list(metadata.keys())
+                else:
+                    metadata_fields = [metadata_fields]
+
+            if metadata_fields is not None:
+                metadata_fields_set = set(metadata_fields)
                 metadata = {
                     k: v for k, v in metadata.items()
-                    if k in metadata_fields
+                    if k in metadata_fields_set
                 }
 
+            # -----------------------------
+            # Flatten or nest
+            # -----------------------------
             if flatten:
                 for k, v in metadata.items():
                     if k not in data:

@@ -527,11 +527,11 @@ def check_duplicates(dup_dict: dict[str, list[str]], corpora: list[dict],
                         }
                     )
     print(f'Total duplicates found (similarity threshold {similarity_threshold}): \
-        {len(duplicate_docs)}')
+        {len(duplicates)}')
     # save duplicates to json file
     save_duplicates(duplicates, dedup_dir)
     end_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    create_duplication_report(len(duplicate_docs), len(corpora), dedup_dir, 
+    create_duplication_report(len(duplicates), len(corpora), dedup_dir, 
                               shingle_size, num_perm, similarity_threshold, 
                               start_time, end_time)
     return duplicates
