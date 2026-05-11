@@ -1,10 +1,17 @@
 from abc import ABC, abstractmethod
+from .step_report import StepReport
 
 class PipelineStep(ABC):
-    def __init__(self, input_directory:str, output_directory:str):
-        self.input_directory = input_directory
-        self.output_directory = output_directory
-
     @abstractmethod
-    def run(self):
+    def run(self, input_directory:str, output_directory:str):
         raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def report(self) -> StepReport:
+        return self.report
