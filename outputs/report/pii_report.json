@@ -1,11 +1,11 @@
 {
   "total_files": 39,
   "total_records": 1308377,
-  "records_with_pii": 3079,
+  "records_with_pii": 3093,
   "records_with_pii_percentage": 0.24,
   "pii_counts_by_type": {
-    "email": 2323,
-    "phone": 2195,
-    "ip": 2514
+    "email": 2335,
+    "phone": 2233,
+    "ip": 2517
   }
 }

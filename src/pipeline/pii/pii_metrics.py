@@ -5,17 +5,25 @@ from typing import Dict, List
 from .pii_methods import detect_pii_combined
 
 MAX_CHUNK_LENGTH = 1000
+CHUNK_OVERLAP = 50
 
 
 def split_text_into_chunks(
     text: str,
     max_length: int = MAX_CHUNK_LENGTH,
+    overlap: int = CHUNK_OVERLAP,
 ) -> List[Dict]:
 
     text = text or ""
 
     if not text:
         return []
+
+    if overlap < 0:
+        overlap = 0
+
+    if overlap >= max_length:
+        overlap = max_length - 1
 
     if len(text) <= max_length:
         return [
@@ -26,9 +34,7 @@ def split_text_into_chunks(
         ]
 
     chunks: List[Dict] = []
-
     text_length = len(text)
-
     start = 0
 
     while start < text_length:
@@ -79,7 +85,18 @@ def split_text_into_chunks(
                 }
             )
 
-        start = end
+        if end >= text_length:
+            break
+
+        next_start = max(
+            0,
+            end - overlap,
+        )
+
+        if next_start <= start:
+            next_start = end
+
+        start = next_start
 
         while (
             start < text_length
@@ -108,6 +125,50 @@ def adjust_chunk_detections(
     return adjusted
 
 
+def normalize_detection_bounds(
+    detections: List[Dict],
+    text: str,
+) -> List[Dict]:
+
+    normalized: List[Dict] = []
+    text_length = len(text)
+
+    for detection in detections:
+        try:
+            start = int(detection["start"])
+            end = int(detection["end"])
+        except (
+            KeyError,
+            TypeError,
+            ValueError,
+        ):
+            continue
+
+        start = max(
+            0,
+            start,
+        )
+
+        end = min(
+            text_length - 1,
+            end,
+        )
+
+        if start > end:
+            continue
+
+        item = detection.copy()
+        item["start"] = start
+        item["end"] = end
+        item["text"] = text[
+            start : end + 1
+        ]
+
+        normalized.append(item)
+
+    return normalized
+
+
 def deduplicate_final_spans(
     spans: List[Dict],
 ) -> List[Dict]:
@@ -116,7 +177,6 @@ def deduplicate_final_spans(
         return []
 
     seen = set()
-
     deduped: List[Dict] = []
 
     for span in sorted(
@@ -176,7 +236,6 @@ def merge_spans(
                 current["end"],
                 span["end"],
             )
-
         else:
             merged.append(
                 {
@@ -199,9 +258,7 @@ def compute_pii_proportion(
     merged = merge_spans(spans)
 
     covered_chars = sum(
-        span["end"]
-        - span["start"]
-        + 1
+        span["end"] - span["start"] + 1
         for span in merged
     )
 
@@ -214,7 +271,7 @@ def compute_pii_metrics(
 ) -> Dict:
 
     updated_record = dict(record)
-    # Remove previous PII metadata before recalculating.
+
     updated_record.pop("has_pii", None)
     updated_record.pop("pii_prop", None)
     updated_record.pop("pii_spans", None)
@@ -233,11 +290,11 @@ def compute_pii_metrics(
     chunks = split_text_into_chunks(
         safe_text,
         max_length=MAX_CHUNK_LENGTH,
+        overlap=CHUNK_OVERLAP,
     )
 
     for chunk in chunks:
         chunk_text = chunk["text"]
-
         chunk_offset = chunk["offset"]
 
         chunk_detections = detect_pii_combined(
@@ -252,6 +309,11 @@ def compute_pii_metrics(
         all_detections.extend(
             chunk_detections
         )
+
+    all_detections = normalize_detection_bounds(
+        all_detections,
+        safe_text,
+    )
 
     all_detections = deduplicate_final_spans(
         all_detections
@@ -270,11 +332,9 @@ def compute_pii_metrics(
         all_detections
     )
 
-    updated_record["pii_prop"] = (
-        compute_pii_proportion(
-            safe_text,
-            all_detections,
-        )
+    updated_record["pii_prop"] = compute_pii_proportion(
+        safe_text,
+        all_detections,
     )
 
     updated_record["pii_spans"] = all_detections

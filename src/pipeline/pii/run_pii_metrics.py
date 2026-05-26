@@ -154,34 +154,13 @@ def extract_text(
     return ""
 
 
-def write_jsonl(
-    path: Path,
-    records: List[Dict],
-) -> None:
-
-    with path.open(
-        "w",
-        encoding="utf-8",
-    ) as file:
-
-        for record in records:
-            file.write(
-                json.dumps(
-                    record,
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-
-
 def init_file_report(
     file_path: Path,
-    total_records: int,
 ) -> Dict:
 
     return {
         "file_name": file_path.name,
-        "total_records": total_records,
+        "total_records": 0,
         "records_with_pii": 0,
         "records_without_pii": 0,
         "total_pii_spans": 0,
@@ -197,6 +176,8 @@ def update_file_report(
     report: Dict,
     updated_record: Dict,
 ) -> None:
+
+    report["total_records"] += 1
 
     spans = (
         updated_record.get(
@@ -340,13 +321,8 @@ def process_file(
     total_files: int,
 ) -> Dict:
 
-    total_records = sum(
-        1 for _ in read_jsonl(path)
-    )
-
     report = init_file_report(
         path,
-        total_records,
     )
 
     desc = (
@@ -359,7 +335,6 @@ def process_file(
     )
 
     pbar = tqdm(
-        total=total_records,
         desc=desc,
         unit="rec",
         leave=False,
@@ -399,10 +374,7 @@ def process_file(
 
             pbar.update(1)
 
-            if (
-                index % 500 == 0
-                or index == total_records
-            ):
+            if index % 500 == 0:
                 pbar.set_postfix(
                     processed=index,
                     spans=report[
