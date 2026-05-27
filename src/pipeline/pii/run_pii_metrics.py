@@ -342,54 +342,62 @@ def process_file(
         file=sys.stdout,
     )
 
-    with tmp_path.open(
-        "w",
-        encoding="utf-8",
-    ) as output_file:
+    try:
+        with tmp_path.open(
+            "w",
+            encoding="utf-8",
+        ) as output_file:
 
-        for index, record in enumerate(
-            read_jsonl(path),
-            start=1,
-        ):
+            for index, record in enumerate(
+                read_jsonl(path),
+                start=1,
+            ):
 
-            text = extract_text(record)
+                text = extract_text(record)
 
-            updated_record = compute_pii_metrics(
-                record,
-                text,
-            )
+                updated_record = compute_pii_metrics(
+                    record,
+                    text,
+                )
 
-            output_file.write(
-                json.dumps(
+                output_file.write(
+                    json.dumps(
+                        updated_record,
+                        ensure_ascii=False,
+                    )
+                    + "\n"
+                )
+
+                update_file_report(
+                    report,
                     updated_record,
-                    ensure_ascii=False,
-                )
-                + "\n"
-            )
-
-            update_file_report(
-                report,
-                updated_record,
-            )
-
-            pbar.update(1)
-
-            if index % 500 == 0:
-                pbar.set_postfix(
-                    processed=index,
-                    spans=report[
-                        "total_pii_spans"
-                    ],
-                    with_pii=report[
-                        "records_with_pii"
-                    ],
                 )
 
-    pbar.close()
+                pbar.update(1)
 
-    tmp_path.replace(path)
+                if index % 500 == 0:
+                    pbar.set_postfix(
+                        processed=index,
+                        spans=report[
+                            "total_pii_spans"
+                        ],
+                        with_pii=report[
+                            "records_with_pii"
+                        ],
+                    )
 
-    return report
+        tmp_path.replace(path)
+
+        return report
+
+    except Exception:
+        if tmp_path.exists():
+            tmp_path.unlink()
+
+        raise
+
+    finally:
+        pbar.close()
 
 
 def main() -> None:
