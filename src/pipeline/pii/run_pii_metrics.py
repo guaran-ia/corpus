@@ -390,15 +390,22 @@ def process_file(
 
         return report
 
-    except Exception:
+    except BaseException:
         if tmp_path.exists():
-            tmp_path.unlink()
+            try:
+                tmp_path.unlink()
+
+            except OSError as cleanup_error:
+                logging.warning(
+                    "Failed to remove temporary file %s: %s",
+                    tmp_path,
+                    cleanup_error,
+                )
 
         raise
 
     finally:
         pbar.close()
-
 
 def main() -> None:
 
