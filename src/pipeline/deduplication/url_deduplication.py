@@ -22,7 +22,9 @@ def normalize_url(url: Optional[str]) -> Optional[str]:
     Returns:
         Optional[str]: The normalized URL if valid, otherwise None.
     """
-    if not url:
+
+    if not isinstance(url, str):
+
         return None
 
     url = url.strip()
@@ -145,13 +147,17 @@ def execute_url_deduplication(data_dir: str, output_dir: str) -> None:
         json.dump(duplicate_ids, f, ensure_ascii=False, indent=2)
 
     # Update each processed corpus file with duplicate metadata.
+
+    # Records are written incrementally to avoid loading large corpora into memory.
     for corpus_file in corpus_files:
         corpus_path = os.path.join(processed_dir, corpus_file)
         corpus_name = os.path.splitext(corpus_file)[0]
-        updated_records = []
+        temp_path = f"{corpus_path}.tmp"
 
-        with open(corpus_path, "r", encoding="utf-8") as f:
-            for idx, line in enumerate(f):
+        with open(corpus_path, "r", encoding="utf-8") as input_file, \
+                open(temp_path, "w", encoding="utf-8") as output_file:
+            for idx, line in enumerate(input_file):
+
                 if not line.strip():
                     continue
 
@@ -170,11 +176,10 @@ def execute_url_deduplication(data_dir: str, output_dir: str) -> None:
                     "docs_ids": duplicate_ids.get(doc_id, []),
                 }
 
-                updated_records.append(record)
 
-        with open(corpus_path, "w", encoding="utf-8") as f:
-            for record in updated_records:
-                f.write(json.dumps(record, ensure_ascii=False) + "\n")
+                output_file.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+        os.replace(temp_path, corpus_path)
 
         print(f"Updated: {corpus_file}")
 
