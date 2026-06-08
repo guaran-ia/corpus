@@ -26,7 +26,7 @@
       "count_sentences_without_terminal_punctuation": 0.7967741935483871,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.8608294930875576,
+      "count_sentences_with_low_guarani_proportion": 0.7543778801843318,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.19078341013824884
@@ -60,7 +60,7 @@
       "count_sentences_without_terminal_punctuation": 1,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 2.6,
+      "count_sentences_with_low_guarani_proportion": 1.7,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0
@@ -94,7 +94,7 @@
       "count_sentences_without_terminal_punctuation": 2.3812647330121965,
       "count_sentences_with_curly_bracket": 0.012298862355232141,
       "count_sentences_with_legal_phrases": 0.002254791431792559,
-      "count_sentences_with_low_guarani_proportion": 40.238802910730755,
+      "count_sentences_with_low_guarani_proportion": 18.59403505175771,
       "count_sentences_with_javascript": 0.0027672440299272316,
       "average_words_in_sentences_starting_with_capital": 0.005739469099108332,
       "count_bad_words_occurrences": 0.5870656964230808
@@ -128,7 +128,7 @@
       "count_sentences_without_terminal_punctuation": 0.12821047467189992,
       "count_sentences_with_curly_bracket": 0.002796516619649209,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.2907764013246659,
+      "count_sentences_with_low_guarani_proportion": 0.24713602354961364,
       "count_sentences_with_javascript": 2.4530847540782535e-05,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.022102293634245065
@@ -162,7 +162,7 @@
       "count_sentences_without_terminal_punctuation": 0.03592120509849363,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.9455388180764774,
+      "count_sentences_with_low_guarani_proportion": 0.019698725376593278,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.06141367323290846
@@ -196,7 +196,7 @@
       "count_sentences_without_terminal_punctuation": 0.008019008019008018,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.5295515295515295,
+      "count_sentences_with_low_guarani_proportion": 0.5726165726165726,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.017226017226017225
@@ -230,7 +230,7 @@
       "count_sentences_without_terminal_punctuation": 0.10662634762029977,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.4164256288894732,
+      "count_sentences_with_low_guarani_proportion": 0.14024016127618547,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.029932509422385834
@@ -264,7 +264,7 @@
       "count_sentences_without_terminal_punctuation": 0.496,
       "count_sentences_with_curly_bracket": 0.0026666666666666666,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.1333333333333333,
+      "count_sentences_with_low_guarani_proportion": 0.7026666666666667,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.07066666666666667
@@ -298,7 +298,7 @@
       "count_sentences_without_terminal_punctuation": 0.06650485436893204,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.5779935275080905,
+      "count_sentences_with_low_guarani_proportion": 0.25226537216828476,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.031067961165048542
@@ -332,7 +332,7 @@
       "count_sentences_without_terminal_punctuation": 0.7888165038002172,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.8751357220412594,
+      "count_sentences_with_low_guarani_proportion": 0.741585233441911,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.21118349619978286
@@ -366,7 +366,7 @@
       "count_sentences_without_terminal_punctuation": 0.6363636363636364,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1,
+      "count_sentences_with_low_guarani_proportion": 0.5454545454545454,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.18181818181818182
@@ -400,7 +400,7 @@
       "count_sentences_without_terminal_punctuation": 0.9477611940298507,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 6.6716417910447765,
+      "count_sentences_with_low_guarani_proportion": 2.082089552238806,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.1791044776119403
@@ -434,7 +434,7 @@
       "count_sentences_without_terminal_punctuation": 0.05737704918032787,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.598360655737705,
+      "count_sentences_with_low_guarani_proportion": 1.0901639344262295,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.040983606557377046
@@ -468,7 +468,7 @@
       "count_sentences_without_terminal_punctuation": 0.267742167289451,
       "count_sentences_with_curly_bracket": 0.0009748970010539427,
       "count_sentences_with_legal_phrases": 2.395324326913864e-06,
-      "count_sentences_with_low_guarani_proportion": 0.9077105490083357,
+      "count_sentences_with_low_guarani_proportion": 0.170939925265881,
       "count_sentences_with_javascript": 5.9883108172846605e-05,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.012774264635431637
@@ -502,7 +502,7 @@
       "count_sentences_without_terminal_punctuation": 2.802139037433155,
       "count_sentences_with_curly_bracket": 0.0053475935828877,
       "count_sentences_with_legal_phrases": 0.026737967914438502,
-      "count_sentences_with_low_guarani_proportion": 257.26737967914437,
+      "count_sentences_with_low_guarani_proportion": 36.11764705882353,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 5.433155080213904
@@ -536,7 +536,7 @@
       "count_sentences_without_terminal_punctuation": 0.062196058356795494,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.5531098029178397,
+      "count_sentences_with_low_guarani_proportion": 0.4947530074225749,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.013309444586639366
@@ -570,7 +570,7 @@
       "count_sentences_without_terminal_punctuation": 0.8172443425952449,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.2002291606989401,
+      "count_sentences_with_low_guarani_proportion": 1.036665711830421,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.06760240618733887
@@ -604,7 +604,7 @@
       "count_sentences_without_terminal_punctuation": 0.02,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 2.3833333333333333,
+      "count_sentences_with_low_guarani_proportion": 0.09222222222222222,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.028333333333333332
@@ -638,7 +638,7 @@
       "count_sentences_without_terminal_punctuation": 0.19657488675616802,
       "count_sentences_with_curly_bracket": 0.014664734458024591,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.8567795915019276,
+      "count_sentences_with_low_guarani_proportion": 0.27357157830457807,
       "count_sentences_with_javascript": 0.0005650798858903198,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.009743070935754062
@@ -672,7 +672,7 @@
       "count_sentences_without_terminal_punctuation": 3.414020316646838,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0.0006406149903907751,
-      "count_sentences_with_low_guarani_proportion": 32.65406790518898,
+      "count_sentences_with_low_guarani_proportion": 13.403038345382996,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.6868307861261096
@@ -706,7 +706,7 @@
       "count_sentences_without_terminal_punctuation": 1,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.9559585492227979,
+      "count_sentences_with_low_guarani_proportion": 0.344559585492228,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.012953367875647668
@@ -740,7 +740,7 @@
       "count_sentences_without_terminal_punctuation": 0.06349206349206349,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 2.746031746031746,
+      "count_sentences_with_low_guarani_proportion": 0.19047619047619047,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0
@@ -774,7 +774,7 @@
       "count_sentences_without_terminal_punctuation": 0.26049035759279,
       "count_sentences_with_curly_bracket": 0.0089155925961818,
       "count_sentences_with_legal_phrases": 0.0001356720612462448,
-      "count_sentences_with_low_guarani_proportion": 3.5480376005426884,
+      "count_sentences_with_low_guarani_proportion": 0.837154763058436,
       "count_sentences_with_javascript": 0.0037794359918596762,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.025293148560907065
@@ -808,7 +808,7 @@
       "count_sentences_without_terminal_punctuation": 0.22774266731485981,
       "count_sentences_with_curly_bracket": 0.0029816885431858692,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.8473505104521147,
+      "count_sentences_with_low_guarani_proportion": 0.2805380003240966,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.014065791605898558
@@ -842,7 +842,7 @@
       "count_sentences_without_terminal_punctuation": 0.8810557968593384,
       "count_sentences_with_curly_bracket": 0.36451720681590377,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 12.565987303708653,
+      "count_sentences_with_low_guarani_proportion": 5.267624457066488,
       "count_sentences_with_javascript": 0.018710324089542266,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.09421984630805212
@@ -876,7 +876,7 @@
       "count_sentences_without_terminal_punctuation": 3.599167872387904e-06,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.596227352236163,
+      "count_sentences_with_low_guarani_proportion": 0.3730681466444958,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.01445785734338221
@@ -910,7 +910,7 @@
       "count_sentences_without_terminal_punctuation": 1,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 2,
+      "count_sentences_with_low_guarani_proportion": 1,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0
@@ -944,7 +944,7 @@
       "count_sentences_without_terminal_punctuation": 1.0199317651283892,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.6868378523971987,
+      "count_sentences_with_low_guarani_proportion": 1.170228048123541,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.20075417489674988
@@ -978,7 +978,7 @@
       "count_sentences_without_terminal_punctuation": 1,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.8913857677902621,
+      "count_sentences_with_low_guarani_proportion": 1,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0
@@ -1012,7 +1012,7 @@
       "count_sentences_without_terminal_punctuation": 1.1807828711148314,
       "count_sentences_with_curly_bracket": 0.045994228693526006,
       "count_sentences_with_legal_phrases": 0.05346168249003238,
-      "count_sentences_with_low_guarani_proportion": 10.499592484084852,
+      "count_sentences_with_low_guarani_proportion": 5.204176487433091,
       "count_sentences_with_javascript": 0.0010353107033504417,
       "average_words_in_sentences_starting_with_capital": 0.007070951825010463,
       "count_bad_words_occurrences": 0.14767495649492257
@@ -1046,7 +1046,7 @@
       "count_sentences_without_terminal_punctuation": 0.8970588235294118,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0.0058823529411764705,
-      "count_sentences_with_low_guarani_proportion": 11.505882352941176,
+      "count_sentences_with_low_guarani_proportion": 7.05,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.4264705882352941
@@ -1080,7 +1080,7 @@
       "count_sentences_without_terminal_punctuation": 0.31020474488137795,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.6808579785505362,
+      "count_sentences_with_low_guarani_proportion": 0.38137796555086123,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.029411764705882353
@@ -1114,7 +1114,7 @@
       "count_sentences_without_terminal_punctuation": 0.007861189801699716,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.658498583569405,
+      "count_sentences_with_low_guarani_proportion": 0.5776203966005665,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.014164305949008499
@@ -1148,7 +1148,7 @@
       "count_sentences_without_terminal_punctuation": 0.19347319347319347,
       "count_sentences_with_curly_bracket": 0.001702001702001702,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.818995818995819,
+      "count_sentences_with_low_guarani_proportion": 0.26551226551226553,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.017723017723017723
@@ -1182,7 +1182,7 @@
       "count_sentences_without_terminal_punctuation": 1.3854494902687673,
       "count_sentences_with_curly_bracket": 0.03246061167747915,
       "count_sentences_with_legal_phrases": 4.633920296570899e-05,
-      "count_sentences_with_low_guarani_proportion": 6.023702502316961,
+      "count_sentences_with_low_guarani_proportion": 3.1781047265987024,
       "count_sentences_with_javascript": 0.0005097312326227989,
       "average_words_in_sentences_starting_with_capital": 0.0013994439295644116,
       "count_bad_words_occurrences": 0.1986793327154773
@@ -1216,7 +1216,7 @@
       "count_sentences_without_terminal_punctuation": 0.49193591313142065,
       "count_sentences_with_curly_bracket": 0.0007097106154965312,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.496282890651337,
+      "count_sentences_with_low_guarani_proportion": 0.38675679991483475,
       "count_sentences_with_javascript": 3.5485530774826566e-05,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.030073987331665514
@@ -1250,7 +1250,7 @@
       "count_sentences_without_terminal_punctuation": 0.3442626118206233,
       "count_sentences_with_curly_bracket": 0.016596788840156886,
       "count_sentences_with_legal_phrases": 0.0005603106826129799,
-      "count_sentences_with_low_guarani_proportion": 7.009757134300674,
+      "count_sentences_with_low_guarani_proportion": 1.7557045423807407,
       "count_sentences_with_javascript": 0.006704407133334621,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.053287478022296504
@@ -1284,7 +1284,7 @@
       "count_sentences_without_terminal_punctuation": 0.02193419740777667,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 1.0543369890329013,
+      "count_sentences_with_low_guarani_proportion": 0.03489531405782652,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.013958125623130608
@@ -1318,7 +1318,7 @@
       "count_sentences_without_terminal_punctuation": 0.7832091188075405,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.9495835160017536,
+      "count_sentences_with_low_guarani_proportion": 0.29307321350284965,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.19224024550635685
@@ -1352,7 +1352,7 @@
       "count_sentences_without_terminal_punctuation": 0.04623115577889447,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.7326633165829146,
+      "count_sentences_with_low_guarani_proportion": 0.2708542713567839,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.018090452261306532
@@ -1386,7 +1386,7 @@
       "count_sentences_without_terminal_punctuation": 0.25958762886597936,
       "count_sentences_with_curly_bracket": 0.07814432989690721,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 28.483092783505153,
+      "count_sentences_with_low_guarani_proportion": 11.376907216494846,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.26082474226804125
@@ -1420,7 +1420,7 @@
       "count_sentences_without_terminal_punctuation": 0.7937619350732018,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 0.856142584341184,
+      "count_sentences_with_low_guarani_proportion": 0.7593889242520687,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.23233609166136218
@@ -1454,7 +1454,7 @@
       "count_sentences_without_terminal_punctuation": 1.0038167938931297,
       "count_sentences_with_curly_bracket": 0,
       "count_sentences_with_legal_phrases": 0,
-      "count_sentences_with_low_guarani_proportion": 2.8969465648854964,
+      "count_sentences_with_low_guarani_proportion": 2.1030534351145036,
       "count_sentences_with_javascript": 0,
       "average_words_in_sentences_starting_with_capital": 0.0,
       "count_bad_words_occurrences": 0.007633587786259542

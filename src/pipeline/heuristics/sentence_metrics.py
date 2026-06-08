@@ -392,7 +392,7 @@ def count_bad_words_occurrences(text: str) -> int:
     return count
 
 def _predict_language_scores(text: str) -> dict:
-    result = _LANGID.identify_languages(text, raw_output=False)
+    result = _LANGID.identify_languages(text, k=1, raw_output=False)
 
     if not result or "languages" not in result:
         return {}
@@ -402,7 +402,23 @@ def _predict_language_scores(text: str) -> dict:
     if isinstance(languages, dict):
         return languages
 
+    # k=1 returns a flat pair, for example: ("grn", 0.7193)
+    if isinstance(languages, tuple) and len(languages) >= 2:
+        lang, score = languages[0], languages[1]
+        return {lang: score}
+
     if isinstance(languages, list):
+        # Defensive handling in case k=1 is returned as ["grn", 0.7193]
+        if (
+            len(languages) >= 2
+            and isinstance(languages[0], str)
+            and isinstance(languages[1], (int, float))
+        ):
+            lang, score = languages[0], languages[1]
+            return {lang: score}
+
+        # k>1 returns a list of pairs, for example:
+        # [("grn", 0.7193), ("spa", 0.2611)]
         scores = {}
 
         for item in languages:
@@ -411,10 +427,6 @@ def _predict_language_scores(text: str) -> dict:
                 scores[lang] = score
 
         return scores
-
-    if isinstance(languages, tuple) and len(languages) >= 2:
-        lang, score = languages[0], languages[1]
-        return {lang: score}
 
     return {}
 
