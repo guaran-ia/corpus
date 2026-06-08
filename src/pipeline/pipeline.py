@@ -3,6 +3,9 @@ from .pipeline_report import PipelineReport
 import os
 from datetime import datetime
 import json
+from .system_info import collect_system_info
+import time
+import psutil
 
 class Pipeline():
     def __init__(self, steps:list[PipelineStep], input_directory:str, output_directory:str):
@@ -13,8 +16,12 @@ class Pipeline():
 
     def run(self):
         print("Starting Pipeline")
+        process = psutil.Process()
+        pipeline_start_perf = time.perf_counter()
         pipeline_start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.report.start_time = pipeline_start_time
+
+        self.report.system_info = collect_system_info()
 
         #The first step will take from the input directory
         step_input_directory = self.input_directory
@@ -49,7 +56,19 @@ class Pipeline():
         print("Finished Pipeline")
         
         pipeline_finish_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        pipeline_runtime = time.perf_counter() - pipeline_start_perf
         self.report.finish_time = pipeline_finish_time
+
+        self.report.execution_info = {
+            "runtime_seconds": pipeline_runtime,
+
+            "memory_rss_mb": round(
+                process.memory_info().rss / (1024 ** 2),
+                2
+            ),
+
+            "cpu_percent": process.cpu_percent(),
+        }
 
         report_path = os.path.join(self.output_directory, "report.json")
         os.makedirs(os.path.dirname(report_path), exist_ok = True)

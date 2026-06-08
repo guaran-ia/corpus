@@ -17,6 +17,10 @@ class PipelineReport:
 
     input_files: int = 0
 
+    system_info: dict[str, Any] = field(default_factory=dict)
+
+    execution_info: dict[str, Any] = field(default_factory=dict)
+
     #pipeline_stats: dict[str, Any] = field(default_factory=dict)
     step_metadata: dict[str, dict[str, Any]] = field(default_factory=dict)
 
