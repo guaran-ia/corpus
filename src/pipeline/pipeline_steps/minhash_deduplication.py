@@ -1,8 +1,8 @@
 import os
-from ..pipeline_step import PipelineStep
+from .pipeline_step import PipelineStep
 from ..utils.loader import load_jsonl
 from ..utils.writer import JSONLWriter
-from ..step_report import StepReport
+from .step_report import StepReport
 from datetime import datetime
 import json
 from tqdm import tqdm

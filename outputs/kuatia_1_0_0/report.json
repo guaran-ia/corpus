@@ -1,0 +1,58 @@
+{
+  "start_time": "2026-06-15 01:10:37",
+  "finish_time": "2026-06-15 01:29:18",
+  "total_steps": 2,
+  "input_documents": 1313005,
+  "output_documents": 959936,
+  "removed_documents": 353069,
+  "input_files": 43,
+  "system_info": {
+    "hostname": "guarania-highdev",
+    "os": {
+      "system": "Linux",
+      "release": "6.14.0-1017-azure",
+      "version": "#17~24.04.1-Ubuntu SMP Mon Dec  1 20:10:50 UTC 2025",
+      "machine": "x86_64"
+    },
+    "cpu": {
+      "physical_cores": 16,
+      "logical_cores": 32,
+      "frequency_mhz": 2340.63175
+    },
+    "memory": {
+      "total_gb": 125.78,
+      "available_gb": 121.96
+    },
+    "python": {
+      "version": "3.12.7 (main, Nov 12 2025, 20:46:46) [GCC 13.3.0]",
+      "executable": "/disk/pipeline/.pipeline_env/bin/python"
+    },
+    "git_commit": "9b9f0045232c6e40b7e0d22a1fbc91aee310d4e9",
+    "environment": {
+      "OMP_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "CUDA_VISIBLE_DEVICES": null
+    }
+  },
+  "execution_info": {
+    "runtime_seconds": 1120.6905195629806,
+    "memory_rss_mb": 237.86,
+    "cpu_percent": 0.0
+  },
+  "step_metadata": {
+    "1_url_deduplication": {
+      "start_time": "2026-06-15 01:10:37",
+      "finish_time": "2026-06-15 01:19:50",
+      "input_documents": 1313005,
+      "remaining_documents": 1312997,
+      "removed_documents": 8
+    },
+    "2_minhash_deduplication": {
+      "start_time": "2026-06-15 01:19:50",
+      "finish_time": "2026-06-15 01:29:18",
+      "input_documents": 1312997,
+      "remaining_documents": 959936,
+      "removed_documents": 353061
+    }
+  }
+}

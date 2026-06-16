@@ -1,15 +1,15 @@
 import os
-from ..pipeline_step import PipelineStep
+from .pipeline_step import PipelineStep
 from ..utils.loader import load_jsonl
 from ..utils.writer import JSONLWriter
-from ..step_report import StepReport
+from .step_report import StepReport
 from datetime import datetime
 import shutil
 import json
 from tqdm import tqdm
 
 class URLDeduplication(PipelineStep):
-    def __init__(self, duplicate_ids_path:str, ignore_files_path:str,):
+    def __init__(self, duplicate_ids_path:str, ignore_files_path:str):
         self.duplicate_ids_path = duplicate_ids_path
         self.ignore_files_path = ignore_files_path
         self.step_report = StepReport(step_name=self.name)

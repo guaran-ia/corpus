@@ -1,4 +1,4 @@
-from .pipeline_step import PipelineStep
+from .pipeline_steps.pipeline_step import PipelineStep
 from .pipeline_report import PipelineReport
 import os
 from datetime import datetime
