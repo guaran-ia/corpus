@@ -5,3 +5,5 @@ nltk==3.9.2
 pandas==3.0.1
 spacy==3.8.11
 tqdm==4.67.1
+torch==2.8.0
+transformers==4.56.2
