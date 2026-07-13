@@ -7,15 +7,19 @@ import os
 import sys
 
 from pathlib import Path
-from typing import Dict, Iterator, List
+from typing import Dict, Iterator, List, Sequence
 
 from dotenv import load_dotenv
 from tqdm import tqdm
 
-from .perplexity_methods import unload_model
+from .perplexity_methods import (
+    get_available_cuda_devices,
+    get_device_memory,
+    load_models,
+    unload_model,
+)
 from .perplexity_metrics import (
-    compute_perplexity_metrics_batch_for_model,
-    record_has_metric,
+    compute_perplexity_metrics_batch,
 )
 
 load_dotenv()
@@ -29,10 +33,10 @@ INPUT_DIR = Path(
     )
 )
 
-BATCH_SIZE = int(
+DOCUMENT_BATCH_SIZE = int(
     os.getenv(
-        "BATCH_SIZE",
-        "1",
+        "PERPLEXITY_DOCUMENT_BATCH_SIZE",
+        os.getenv("BATCH_SIZE", "8"),
     )
 )
 
@@ -50,9 +54,6 @@ MODEL_TO_METRIC = {
 def parse_args() -> argparse.Namespace:
     """
     Parse command line arguments.
-
-    Args:
-        None.
 
     Returns:
         argparse.Namespace: Parsed command line arguments.
@@ -78,12 +79,26 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def validate_runtime_config() -> None:
+    """
+    Validate pipeline-level configuration.
+
+    Raises:
+        ValueError: If DOCUMENT_BATCH_SIZE is invalid.
+    """
+    if DOCUMENT_BATCH_SIZE <= 0:
+        raise ValueError(
+            "PERPLEXITY_DOCUMENT_BATCH_SIZE must be greater "
+            f"than 0. Current value: {DOCUMENT_BATCH_SIZE}"
+        )
+
+
 def get_metrics_to_process(model: str) -> List[str]:
     """
     Resolve the perplexity metrics that should be processed.
 
     Args:
-        model (str): Selected model name from the command line.
+        model (str): Selected model name.
 
     Returns:
         List[str]: Metadata metric names to compute.
@@ -91,9 +106,7 @@ def get_metrics_to_process(model: str) -> List[str]:
     if model == "all":
         return list(METRIC_STEPS)
 
-    return [
-        MODEL_TO_METRIC[model]
-    ]
+    return [MODEL_TO_METRIC[model]]
 
 
 def read_jsonl(path: Path) -> Iterator[Dict]:
@@ -103,27 +116,46 @@ def read_jsonl(path: Path) -> Iterator[Dict]:
     Args:
         path (Path): Path to the JSONL file.
 
-    Returns:
-        Iterator[Dict]: Iterator over parsed JSON records.
+    Yields:
+        Dict: Parsed JSON object.
+
+    Raises:
+        ValueError: If a line does not contain a JSON object.
+        json.JSONDecodeError: If a line is not valid JSON.
     """
     with path.open(
         "r",
         encoding="utf-8",
     ) as file:
-        for line in file:
-            if line.strip():
-                yield json.loads(line)
+        for line_number, line in enumerate(
+            file,
+            start=1,
+        ):
+            if not line.strip():
+                continue
+
+            record = json.loads(line)
+
+            if not isinstance(record, dict):
+                raise ValueError(
+                    f"Expected a JSON object in {path} "
+                    f"at line {line_number}."
+                )
+
+            yield record
 
 
 def extract_text(record: Dict) -> str:
     """
     Extract the document text from a corpus record.
 
+    Fields are checked in this order: text, sentence, content.
+
     Args:
         record (Dict): Corpus document record.
 
     Returns:
-        str: Extracted text from text, sentence, or content.
+        str: Extracted text or an empty string.
     """
     for key in (
         "text",
@@ -150,9 +182,6 @@ def write_records(
         output_file: Open writable file object.
         records (List[Dict]): Records to write.
         pbar (tqdm): Progress bar to update.
-
-    Returns:
-        None.
     """
     for record in records:
         output_file.write(
@@ -162,86 +191,66 @@ def write_records(
             )
             + "\n"
         )
+
         pbar.update(1)
 
 
-def write_batch_for_metric(
+def write_batch_for_metrics(
     output_file,
     records: List[Dict],
     texts: List[str],
-    metric_name: str,
+    metric_names: Sequence[str],
+    concurrent: bool,
     pbar: tqdm,
 ) -> None:
     """
-    Compute a metric for missing records in a batch and write all records.
+    Compute missing metrics and write the complete record batch.
 
     Args:
         output_file: Open writable file object.
-        records (List[Dict]): Batch of corpus document records.
-        texts (List[str]): Texts extracted from the batch records.
-        metric_name (str): Metadata metric to compute.
+        records (List[Dict]): Batch of corpus records.
+        texts (List[str]): Texts extracted from the records.
+        metric_names (Sequence[str]): Metadata metrics to compute.
+        concurrent (bool): Whether models should run concurrently.
         pbar (tqdm): Progress bar to update.
-
-    Returns:
-        None.
     """
-    records_to_compute: List[Dict] = []
-    texts_to_compute: List[str] = []
-    computed_positions: List[int] = []
-
-    updated_records = [
-        dict(record)
-        for record in records
-    ]
-
-    for index, record in enumerate(records):
-        if record_has_metric(
-            record,
-            metric_name,
-        ):
-            continue
-
-        records_to_compute.append(record)
-        texts_to_compute.append(texts[index])
-        computed_positions.append(index)
-
-    if records_to_compute:
-        computed_records = compute_perplexity_metrics_batch_for_model(
-            records_to_compute,
-            texts_to_compute,
-            metric_name,
+    if len(records) != len(texts):
+        raise ValueError(
+            "Records and texts must have the same length. "
+            f"Records: {len(records)}. "
+            f"Texts: {len(texts)}."
         )
 
-        for original_position, computed_record in zip(
-            computed_positions,
-            computed_records,
-        ):
-            updated_records[original_position] = computed_record
+    updated_records = compute_perplexity_metrics_batch(
+        records=records,
+        texts=texts,
+        metric_names=metric_names,
+        concurrent=concurrent,
+    )
 
     write_records(
-        output_file,
-        updated_records,
-        pbar,
+        output_file=output_file,
+        records=updated_records,
+        pbar=pbar,
     )
 
 
-def process_path_for_metric(
+def process_path_for_metrics(
     input_path: Path,
     output_path: Path,
-    metric_name: str,
+    metric_names: Sequence[str],
+    concurrent: bool,
     desc: str,
 ) -> None:
     """
-    Process one JSONL path for a single perplexity metric.
+    Process one JSONL path for one or more perplexity metrics.
 
     Args:
-        input_path (Path): Source JSONL file to read.
-        output_path (Path): Temporary JSONL file to write.
-        metric_name (str): Metadata metric to compute.
+        input_path (Path): Source JSONL file.
+        output_path (Path): Temporary JSONL output file.
+        metric_names (Sequence[str]): Metadata metrics to compute.
+        concurrent (bool): Whether models should run concurrently.
         desc (str): Progress bar description.
-
-    Returns:
-        None.
     """
     pbar = tqdm(
         desc=desc,
@@ -265,63 +274,67 @@ def process_path_for_metric(
                     extract_text(record)
                 )
 
-                if len(batch_records) >= BATCH_SIZE:
-                    write_batch_for_metric(
-                        output_file,
-                        batch_records,
-                        batch_texts,
-                        metric_name,
-                        pbar,
+                if len(batch_records) >= DOCUMENT_BATCH_SIZE:
+                    write_batch_for_metrics(
+                        output_file=output_file,
+                        records=batch_records,
+                        texts=batch_texts,
+                        metric_names=metric_names,
+                        concurrent=concurrent,
+                        pbar=pbar,
                     )
 
                     batch_records = []
                     batch_texts = []
 
             if batch_records:
-                write_batch_for_metric(
-                    output_file,
-                    batch_records,
-                    batch_texts,
-                    metric_name,
-                    pbar,
+                write_batch_for_metrics(
+                    output_file=output_file,
+                    records=batch_records,
+                    texts=batch_texts,
+                    metric_names=metric_names,
+                    concurrent=concurrent,
+                    pbar=pbar,
                 )
 
     finally:
         pbar.close()
 
 
-def process_file_for_metric(
+def process_file_for_metrics(
     path: Path,
-    metric_name: str,
+    metric_names: Sequence[str],
+    concurrent: bool,
     file_position: int,
     total_files: int,
 ) -> None:
     """
-    Safely process one corpus file for a single perplexity metric.
+    Safely process one corpus file for one or more metrics.
 
     Args:
         path (Path): Corpus JSONL file to update.
-        metric_name (str): Metadata metric to compute.
+        metric_names (Sequence[str]): Metadata metrics to compute.
+        concurrent (bool): Whether models should run concurrently.
         file_position (int): Current file position.
         total_files (int): Total number of files.
-
-    Returns:
-        None.
     """
+    metrics_suffix = ".".join(metric_names)
+
     tmp_path = path.with_suffix(
-        path.suffix + f".{metric_name}.tmp"
+        path.suffix + f".{metrics_suffix}.tmp"
     )
 
     desc = (
         f"[{file_position}/{total_files}] "
-        f"{path.name} | {metric_name}"
+        f"{path.name} | {','.join(metric_names)}"
     )
 
     try:
-        process_path_for_metric(
+        process_path_for_metrics(
             input_path=path,
             output_path=tmp_path,
-            metric_name=metric_name,
+            metric_names=metric_names,
+            concurrent=concurrent,
             desc=desc,
         )
 
@@ -331,6 +344,7 @@ def process_file_for_metric(
         if tmp_path.exists():
             try:
                 tmp_path.unlink()
+
             except OSError as cleanup_error:
                 logging.warning(
                     "Failed to remove temporary file %s: %s",
@@ -341,62 +355,80 @@ def process_file_for_metric(
         raise
 
 
-def process_metric_for_all_files(
+def print_runtime_resources() -> None:
+    """
+    Print the CUDA resources visible to the process.
+    """
+    cuda_devices = get_available_cuda_devices()
+
+    if not cuda_devices:
+        print("CUDA is not available. Using CPU inference.")
+        return
+
+    for device_index in cuda_devices:
+        free_memory, total_memory = get_device_memory(
+            device_index
+        )
+
+        free_gib = free_memory / (1024 ** 3)
+        total_gib = total_memory / (1024 ** 3)
+
+        print(
+            f"CUDA device {device_index}: "
+            f"free={free_gib:.2f} GiB, "
+            f"total={total_gib:.2f} GiB"
+        )
+
+
+def process_all_files(
     files: List[Path],
-    metric_name: str,
+    metric_names: Sequence[str],
+    concurrent: bool,
 ) -> None:
     """
-    Process all corpus files for one perplexity metric.
+    Process all corpus files for the requested metrics.
 
     Args:
         files (List[Path]): Corpus JSONL files to update.
-        metric_name (str): Metadata metric to compute.
-
-    Returns:
-        None.
+        metric_names (Sequence[str]): Metadata metrics to compute.
+        concurrent (bool): Whether models should run concurrently.
     """
     print(
-        f"\nStarting metric: {metric_name}"
+        "\nStarting metrics: "
+        + ", ".join(metric_names)
     )
 
     files_bar = tqdm(
         files,
-        desc=f"Processing {metric_name}",
+        desc="Processing perplexity metadata",
         unit="file",
         dynamic_ncols=True,
         file=sys.stdout,
     )
 
-    try:
-        for index, path in enumerate(
-            files_bar,
-            start=1,
-        ):
-            files_bar.set_postfix(
-                current=path.name
-            )
+    for index, path in enumerate(
+        files_bar,
+        start=1,
+    ):
+        files_bar.set_postfix(
+            current=path.name
+        )
 
-            process_file_for_metric(
-                path=path,
-                metric_name=metric_name,
-                file_position=index,
-                total_files=len(files),
-            )
-
-    finally:
-        unload_model()
+        process_file_for_metrics(
+            path=path,
+            metric_names=metric_names,
+            concurrent=concurrent,
+            file_position=index,
+            total_files=len(files),
+        )
 
 
 def main() -> None:
     """
-    Run perplexity metadata computation for all configured corpus files.
-
-    Args:
-        None.
-
-    Returns:
-        None.
+    Run perplexity metadata computation.
     """
+    validate_runtime_config()
+
     args = parse_args()
 
     files = sorted(
@@ -409,25 +441,42 @@ def main() -> None:
         )
         return
 
-    metrics_to_process = get_metrics_to_process(
+    metric_names = get_metrics_to_process(
         args.model
+    )
+
+    concurrent = (
+        args.model == "all"
+        and len(metric_names) > 1
     )
 
     print(
         f"Using INPUT_DIR={INPUT_DIR}"
     )
     print(
-        f"Using BATCH_SIZE={BATCH_SIZE}"
+        "Using PERPLEXITY_DOCUMENT_BATCH_SIZE="
+        f"{DOCUMENT_BATCH_SIZE}"
     )
     print(
         f"Using model={args.model}"
     )
+    print(
+        f"Concurrent model execution={concurrent}"
+    )
 
-    for metric_name in metrics_to_process:
-        process_metric_for_all_files(
-            files,
-            metric_name,
+    print_runtime_resources()
+
+    try:
+        load_models(metric_names)
+
+        process_all_files(
+            files=files,
+            metric_names=metric_names,
+            concurrent=concurrent,
         )
+
+    finally:
+        unload_model()
 
     print(
         "\nProcessing completed."
