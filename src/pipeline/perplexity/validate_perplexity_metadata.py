@@ -4,7 +4,8 @@ import json
 import os
 
 from pathlib import Path
-from typing import Dict, Iterator, List, Tuple
+from typing import Dict, Iterator, List
+
 
 BASE_DIR = (
     Path(__file__)
@@ -44,37 +45,30 @@ LOG_PATH = Path(
     )
 )
 
-REQUIRED_METRICS = (
-    "coreguapa_perplexity",
-    "tweets_perplexity",
-)
+COREGUAPA_METRIC = "coreguapa_perplexity"
+TWEETS_METRIC = "tweets_perplexity"
 
 
 def read_jsonl(
     path: Path,
-) -> Iterator[Tuple[int, Dict]]:
+) -> Iterator[Dict]:
     """
     Read a JSONL file and yield one record per non-empty line.
 
     Args:
-        path (Path):
-            Path to the JSONL file.
+        path (Path): Path to the JSONL file.
 
     Yields:
-        Tuple[int, Dict]:
-            Line number and parsed JSON record.
+        Dict: Parsed JSON record.
 
     Raises:
-        ValueError:
-            If a JSONL line does not contain a JSON object.
-        json.JSONDecodeError:
-            If a non-empty line contains invalid JSON.
+        ValueError: If a line does not contain a JSON object.
+        json.JSONDecodeError: If a line contains invalid JSON.
     """
     with path.open(
         "r",
         encoding="utf-8",
     ) as file:
-
         for line_number, line in enumerate(
             file,
             start=1,
@@ -82,23 +76,15 @@ def read_jsonl(
             if not line.strip():
                 continue
 
-            record = json.loads(
-                line
-            )
+            record = json.loads(line)
 
-            if not isinstance(
-                record,
-                dict,
-            ):
+            if not isinstance(record, dict):
                 raise ValueError(
                     f"Expected a JSON object in {path} "
                     f"at line {line_number}."
                 )
 
-            yield (
-                line_number,
-                record,
-            )
+            yield record
 
 
 def get_corpus_name(
@@ -106,22 +92,19 @@ def get_corpus_name(
     record: Dict,
 ) -> str:
     """
-    Resolve the corpus name for a document record.
+    Resolve the corpus name for a document.
+
+    The value of the root-level ``corpus`` field is used
+    when available. Otherwise, the JSONL file stem is used.
 
     Args:
-        file_path (Path):
-            Path to the source JSONL file.
-        record (Dict):
-            Corpus document record.
+        file_path (Path): Source JSONL file.
+        record (Dict): Document record.
 
     Returns:
-        str:
-            Corpus name from the record when available,
-            otherwise the file stem.
+        str: Corpus name.
     """
-    corpus = record.get(
-        "corpus"
-    )
+    corpus = record.get("corpus")
 
     if (
         isinstance(corpus, str)
@@ -137,54 +120,35 @@ def record_has_metric(
     metric_name: str,
 ) -> bool:
     """
-    Check whether a document contains a valid perplexity metric.
-
-    Perplexity metrics are expected directly at the root level
-    of each document record.
+    Check whether a record contains a valid metric.
 
     Args:
-        record (Dict):
-            Corpus document record.
-        metric_name (str):
-            Perplexity metric name.
+        record (Dict): Document record.
+        metric_name (str): Metric name.
 
     Returns:
-        bool:
-            True when the metric exists and its value is not None.
+        bool: True when the metric value is not None.
     """
-    return (
-        metric_name in record
-        and record.get(
-            metric_name
-        )
-        is not None
-    )
+    return record.get(metric_name) is not None
 
 
 def initialize_corpus_report(
     corpus: str,
 ) -> Dict:
     """
-    Create an empty validation report for one corpus.
+    Create the counters for one corpus.
 
     Args:
-        corpus (str):
-            Corpus name.
+        corpus (str): Corpus name.
 
     Returns:
-        Dict:
-            Initialized report counters.
+        Dict: Initialized counters.
     """
     return {
         "corpus": corpus,
-        "total_records": 0,
-        "records_with_coreguapa_perplexity": 0,
-        "records_with_tweets_perplexity": 0,
-        "records_with_both_perplexities": 0,
-        "records_missing_coreguapa_perplexity": 0,
-        "records_missing_tweets_perplexity": 0,
-        "records_missing_any_perplexity": 0,
-        "source_files": [],
+        "documents": 0,
+        "documents_with_coreguapa_perplexity": 0,
+        "documents_with_tweets_perplexity": 0,
     }
 
 
@@ -194,100 +158,44 @@ def update_report(
     record: Dict,
 ) -> None:
     """
-    Update validation counters for one corpus document.
-
-    Perplexity values are read directly from the document root,
-    for example:
-
-        {
-            "text": "...",
-            "coreguapa_perplexity": 12.45,
-            "tweets_perplexity": 34.67
-        }
+    Update the counters for one document.
 
     Args:
         reports_by_corpus (Dict[str, Dict]):
             Reports indexed by corpus name.
         file_path (Path):
-            Path to the source JSONL file.
+            Source JSONL file.
         record (Dict):
-            Corpus document record.
-
-    Returns:
-        None.
+            Document record.
     """
     corpus = get_corpus_name(
-        file_path,
-        record,
+        file_path=file_path,
+        record=record,
     )
 
     if corpus not in reports_by_corpus:
-        reports_by_corpus[
-            corpus
-        ] = initialize_corpus_report(
-            corpus
+        reports_by_corpus[corpus] = (
+            initialize_corpus_report(corpus)
         )
 
-    report = reports_by_corpus[
-        corpus
-    ]
+    report = reports_by_corpus[corpus]
 
-    file_name = file_path.name
+    report["documents"] += 1
 
-    if file_name not in report[
-        "source_files"
-    ]:
-        report[
-            "source_files"
-        ].append(
-            file_name
-        )
-
-    has_coreguapa = record_has_metric(
+    if record_has_metric(
         record,
-        "coreguapa_perplexity",
-    )
-
-    has_tweets = record_has_metric(
-        record,
-        "tweets_perplexity",
-    )
-
-    report[
-        "total_records"
-    ] += 1
-
-    if has_coreguapa:
-        report[
-            "records_with_coreguapa_perplexity"
-        ] += 1
-
-    else:
-        report[
-            "records_missing_coreguapa_perplexity"
-        ] += 1
-
-    if has_tweets:
-        report[
-            "records_with_tweets_perplexity"
-        ] += 1
-
-    else:
-        report[
-            "records_missing_tweets_perplexity"
-        ] += 1
-
-    if (
-        has_coreguapa
-        and has_tweets
+        COREGUAPA_METRIC,
     ):
         report[
-            "records_with_both_perplexities"
+            "documents_with_coreguapa_perplexity"
         ] += 1
 
-    else:
+    if record_has_metric(
+        record,
+        TWEETS_METRIC,
+    ):
         report[
-            "records_missing_any_perplexity"
+            "documents_with_tweets_perplexity"
         ] += 1
 
 
@@ -295,50 +203,36 @@ def validate_reports(
     reports: List[Dict],
 ) -> bool:
     """
-    Check whether every corpus report has complete perplexity metadata.
+    Check whether every document contains both metrics.
 
     Args:
-        reports (List[Dict]):
-            Per-corpus validation reports.
+        reports (List[Dict]): Per-corpus reports.
 
     Returns:
-        bool:
-            True when every document has both
-            perplexity metrics.
+        bool: True when all documents contain both metrics.
     """
     if not reports:
         return False
 
     for report in reports:
+        total_documents = report["documents"]
 
-        total = report[
-            "total_records"
-        ]
-
-        if total <= 0:
+        if total_documents <= 0:
             return False
 
         if (
             report[
-                "records_with_coreguapa_perplexity"
+                "documents_with_coreguapa_perplexity"
             ]
-            != total
+            != total_documents
         ):
             return False
 
         if (
             report[
-                "records_with_tweets_perplexity"
+                "documents_with_tweets_perplexity"
             ]
-            != total
-        ):
-            return False
-
-        if (
-            report[
-                "records_with_both_perplexities"
-            ]
-            != total
+            != total_documents
         ):
             return False
 
@@ -347,121 +241,53 @@ def validate_reports(
 
 def build_summary(
     reports: List[Dict],
-    files: List[Path],
-    invalid_records: List[Dict],
 ) -> Dict:
     """
-    Build the global validation summary.
+    Build global totals.
 
     Args:
-        reports (List[Dict]):
-            Per-corpus validation reports.
-        files (List[Path]):
-            JSONL files discovered in the input directory.
-        invalid_records (List[Dict]):
-            Records describing files that could not be validated.
+        reports (List[Dict]): Per-corpus reports.
 
     Returns:
-        Dict:
-            Global validation totals.
+        Dict: Global summary.
     """
-    total_records = sum(
-        report[
-            "total_records"
-        ]
-        for report in reports
-    )
-
-    records_with_coreguapa = sum(
-        report[
-            "records_with_coreguapa_perplexity"
-        ]
-        for report in reports
-    )
-
-    records_with_tweets = sum(
-        report[
-            "records_with_tweets_perplexity"
-        ]
-        for report in reports
-    )
-
-    records_with_both = sum(
-        report[
-            "records_with_both_perplexities"
-        ]
-        for report in reports
-    )
-
     return {
-        "input_directory": str(
-            INPUT_DIR
+        "corpora_processed": len(reports),
+        "total_documents": sum(
+            report["documents"]
+            for report in reports
         ),
-        "files_found": len(
-            files
+        "documents_with_coreguapa_perplexity": sum(
+            report[
+                "documents_with_coreguapa_perplexity"
+            ]
+            for report in reports
         ),
-        "corpora_found": len(
-            reports
-        ),
-        "total_records": total_records,
-        "records_with_coreguapa_perplexity": (
-            records_with_coreguapa
-        ),
-        "records_with_tweets_perplexity": (
-            records_with_tweets
-        ),
-        "records_with_both_perplexities": (
-            records_with_both
-        ),
-        "records_missing_coreguapa_perplexity": (
-            total_records
-            - records_with_coreguapa
-        ),
-        "records_missing_tweets_perplexity": (
-            total_records
-            - records_with_tweets
-        ),
-        "records_missing_any_perplexity": (
-            total_records
-            - records_with_both
-        ),
-        "invalid_files": len(
-            invalid_records
+        "documents_with_tweets_perplexity": sum(
+            report[
+                "documents_with_tweets_perplexity"
+            ]
+            for report in reports
         ),
     }
 
 
 def write_report(
     reports: List[Dict],
-    files: List[Path],
-    invalid_records: List[Dict],
+    invalid_files: List[Dict],
     is_valid: bool,
 ) -> None:
     """
-    Save the perplexity metadata validation report.
+    Write the validation report as JSON.
 
     Args:
-        reports (List[Dict]):
-            Per-corpus validation reports.
-        files (List[Path]):
-            JSONL files discovered in the input directory.
-        invalid_records (List[Dict]):
-            Files or lines that could not be validated.
-        is_valid (bool):
-            Final validation status.
-
-    Returns:
-        None.
+        reports (List[Dict]): Per-corpus reports.
+        invalid_files (List[Dict]): Files that could not be read.
+        is_valid (bool): Final validation status.
     """
     OUTPUT_DIR.mkdir(
         parents=True,
         exist_ok=True,
-    )
-
-    summary = build_summary(
-        reports=reports,
-        files=files,
-        invalid_records=invalid_records,
     )
 
     output = {
@@ -470,13 +296,12 @@ def write_report(
             if is_valid
             else "invalid"
         ),
-        "required_metrics": list(
-            REQUIRED_METRICS
-        ),
-        "summary": summary,
+        "summary": build_summary(reports),
         "corpora": reports,
-        "errors": invalid_records,
     }
+
+    if invalid_files:
+        output["errors"] = invalid_files
 
     with LOG_PATH.open(
         "w",
@@ -489,146 +314,127 @@ def write_report(
             indent=2,
         )
 
-        file.write(
-            "\n"
-        )
+        file.write("\n")
 
 
 def print_summary(
     reports: List[Dict],
-    files: List[Path],
-    invalid_records: List[Dict],
     is_valid: bool,
 ) -> None:
     """
-    Print a compact validation summary.
+    Print a simplified validation table.
 
     Args:
-        reports (List[Dict]):
-            Per-corpus validation reports.
-        files (List[Path]):
-            JSONL files discovered in the input directory.
-        invalid_records (List[Dict]):
-            Files or records that could not be validated.
-        is_valid (bool):
-            Final validation status.
-
-    Returns:
-        None.
+        reports (List[Dict]): Per-corpus reports.
+        is_valid (bool): Final validation status.
     """
-    summary = build_summary(
-        reports=reports,
-        files=files,
-        invalid_records=invalid_records,
+    summary = build_summary(reports)
+
+    corpus_width = max(
+        30,
+        max(
+            (
+                len(report["corpus"])
+                for report in reports
+            ),
+            default=0,
+        ),
+    )
+
+    separator_width = (
+        corpus_width
+        + 15
+        + 18
+        + 18
     )
 
     print()
+    print("=" * separator_width)
+    print("Perplexity metadata validation")
+    print("=" * separator_width)
+
     print(
-        "=" * 80
+        f"{'Corpus':<{corpus_width}}"
+        f"{'Documents':>15}"
+        f"{'CoreGuapa':>18}"
+        f"{'GN Tweets':>18}"
+    )
+
+    print("-" * separator_width)
+
+    for report in reports:
+        print(
+            f"{report['corpus']:<{corpus_width}}"
+            f"{report['documents']:>15}"
+            f"{report[
+                'documents_with_coreguapa_perplexity'
+            ]:>18}"
+            f"{report[
+                'documents_with_tweets_perplexity'
+            ]:>18}"
+        )
+
+    print("-" * separator_width)
+
+    print(
+        f"{'TOTAL':<{corpus_width}}"
+        f"{summary['total_documents']:>15}"
+        f"{summary[
+            'documents_with_coreguapa_perplexity'
+        ]:>18}"
+        f"{summary[
+            'documents_with_tweets_perplexity'
+        ]:>18}"
+    )
+
+    print("=" * separator_width)
+
+    print(
+        f"Corpora processed : "
+        f"{summary['corpora_processed']}"
     )
     print(
-        "Perplexity metadata validation"
+        f"Total documents   : "
+        f"{summary['total_documents']}"
     )
     print(
-        "=" * 80
+        f"With CoreGuapa    : "
+        f"{summary[
+            'documents_with_coreguapa_perplexity'
+        ]}"
     )
     print(
-        f"Input directory                  : "
-        f"{INPUT_DIR}"
+        f"With GN Tweets    : "
+        f"{summary[
+            'documents_with_tweets_perplexity'
+        ]}"
     )
     print(
-        f"JSONL files found               : "
-        f"{summary['files_found']}"
-    )
-    print(
-        f"Corpora found                    : "
-        f"{summary['corpora_found']}"
-    )
-    print(
-        f"Total documents                  : "
-        f"{summary['total_records']}"
-    )
-    print(
-        f"With coreguapa_perplexity        : "
-        f"{summary['records_with_coreguapa_perplexity']}"
-    )
-    print(
-        f"With tweets_perplexity           : "
-        f"{summary['records_with_tweets_perplexity']}"
-    )
-    print(
-        f"With both metrics                : "
-        f"{summary['records_with_both_perplexities']}"
-    )
-    print(
-        f"Missing coreguapa_perplexity     : "
-        f"{summary['records_missing_coreguapa_perplexity']}"
-    )
-    print(
-        f"Missing tweets_perplexity        : "
-        f"{summary['records_missing_tweets_perplexity']}"
-    )
-    print(
-        f"Missing at least one metric      : "
-        f"{summary['records_missing_any_perplexity']}"
-    )
-    print(
-        f"Invalid files                    : "
-        f"{summary['invalid_files']}"
-    )
-    print(
-        f"Validation status                : "
+        f"Validation status : "
         f"{'PASS' if is_valid else 'FAIL'}"
     )
     print(
-        f"Report saved to                  : "
+        f"Report saved to   : "
         f"{LOG_PATH}"
     )
-    print(
-        "=" * 80
-    )
+    print("=" * separator_width)
 
 
 def main() -> None:
     """
-    Validate perplexity metadata for all processed corpora
-    and save a validation report.
+    Validate perplexity metadata in every JSONL document.
 
-    Perplexity metrics are expected at the root level of each
-    JSONL document.
-
-    Args:
-        None.
-
-    Returns:
-        None.
-
-    Raises:
-        SystemExit:
-            If no JSONL files are found, a file cannot be read,
-            or any document is missing at least one required
-            perplexity metric.
+    The validation passes only when every document contains
+    both ``coreguapa_perplexity`` and ``tweets_perplexity``.
     """
     files = sorted(
-        INPUT_DIR.glob(
-            "*.jsonl"
-        )
+        INPUT_DIR.glob("*.jsonl")
     )
-
-    reports_by_corpus: Dict[
-        str,
-        Dict,
-    ] = {}
-
-    invalid_records: List[
-        Dict
-    ] = []
 
     if not files:
         write_report(
             reports=[],
-            files=[],
-            invalid_records=[],
+            invalid_files=[],
             is_valid=False,
         )
 
@@ -636,19 +442,16 @@ def main() -> None:
             f"No JSONL files found in {INPUT_DIR}."
         )
 
-    for file_path in files:
+    reports_by_corpus: Dict[str, Dict] = {}
+    invalid_files: List[Dict] = []
 
+    for file_path in files:
         try:
-            for (
-                line_number,
-                record,
-            ) in read_jsonl(
-                file_path
-            ):
+            for record in read_jsonl(file_path):
                 update_report(
-                    reports_by_corpus,
-                    file_path,
-                    record,
+                    reports_by_corpus=reports_by_corpus,
+                    file_path=file_path,
+                    record=record,
                 )
 
         except (
@@ -656,58 +459,48 @@ def main() -> None:
             ValueError,
             OSError,
         ) as error:
-            invalid_records.append(
+            invalid_files.append(
                 {
-                    "file": str(
-                        file_path
-                    ),
-                    "error": str(
-                        error
-                    ),
+                    "file": str(file_path),
+                    "error": str(error),
                 }
             )
 
     reports = sorted(
         reports_by_corpus.values(),
-        key=lambda item: item[
-            "corpus"
-        ],
+        key=lambda report: report["corpus"],
     )
 
-    for report in reports:
-        report[
-            "source_files"
-        ] = sorted(
-            report[
-                "source_files"
-            ]
-        )
-
     is_valid = (
-        validate_reports(
-            reports
-        )
-        and not invalid_records
+        validate_reports(reports)
+        and not invalid_files
     )
 
     write_report(
         reports=reports,
-        files=files,
-        invalid_records=invalid_records,
+        invalid_files=invalid_files,
         is_valid=is_valid,
     )
 
     print_summary(
         reports=reports,
-        files=files,
-        invalid_records=invalid_records,
         is_valid=is_valid,
     )
 
+    if invalid_files:
+        print()
+        print("Files that could not be validated:")
+
+        for invalid_file in invalid_files:
+            print(
+                f"- {invalid_file['file']}: "
+                f"{invalid_file['error']}"
+            )
+
     if not is_valid:
         raise SystemExit(
-            "Some documents are missing perplexity metadata "
-            "or could not be validated."
+            "Some documents are missing perplexity "
+            "metadata or could not be validated."
         )
 
 

@@ -253,6 +253,11 @@ def load_model(
     """
     Load a tokenizer and causal language model.
 
+    The tokenizer maximum length is synchronized with the effective context
+    length declared by the model configuration. This avoids stale tokenizer
+    warnings when the tokenizer reports a smaller generic limit than the
+    actual model context window.
+
     Args:
         metric_name (str): Metadata metric computed by the model.
         model_id (str): Hugging Face model identifier.
@@ -301,6 +306,33 @@ def load_model(
 
         if device.type == "cpu":
             model.to(device)
+
+        model_max_length = getattr(
+            model.config,
+            "max_position_embeddings",
+            MAX_LENGTH,
+        )
+
+        if (
+            not isinstance(model_max_length, int)
+            or model_max_length <= 1
+        ):
+            model_max_length = MAX_LENGTH
+
+        effective_max_length = min(
+            model_max_length,
+            MAX_LENGTH,
+        )
+
+        tokenizer.model_max_length = effective_max_length
+
+        print(
+            f"Model max positions={model_max_length}"
+        )
+        print(
+            "Configured tokenizer.model_max_length="
+            f"{tokenizer.model_max_length}"
+        )
 
         model.eval()
 
