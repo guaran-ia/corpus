@@ -188,6 +188,7 @@ def write_records(
             json.dumps(
                 record,
                 ensure_ascii=False,
+                allow_nan=False,
             )
             + "\n"
         )
@@ -423,6 +424,69 @@ def process_all_files(
         )
 
 
+def can_run_metrics_concurrently(
+    metric_names: Sequence[str],
+) -> bool:
+    """
+    Check whether each requested metric can use a separate CUDA device.
+
+    Args:
+        metric_names (Sequence[str]): Requested metrics.
+
+    Returns:
+        bool: True when concurrent execution is possible.
+    """
+    cuda_devices = get_available_cuda_devices()
+
+    return (
+        len(metric_names) > 1
+        and len(cuda_devices) >= len(metric_names)
+    )
+
+
+def run_requested_metrics(
+    files: List[Path],
+    metric_names: Sequence[str],
+    concurrent: bool,
+) -> None:
+    """
+    Process requested metrics concurrently or sequentially.
+
+    Args:
+        files (List[Path]): Corpus JSONL files.
+        metric_names (Sequence[str]): Requested metrics.
+        concurrent (bool): Whether concurrent execution is enabled.
+    """
+    if concurrent:
+        try:
+            load_models(metric_names)
+
+            process_all_files(
+                files=files,
+                metric_names=metric_names,
+                concurrent=True,
+            )
+
+        finally:
+            unload_model()
+
+        return
+
+    for metric_name in metric_names:
+        print(f"Running metric sequentially: {metric_name}")
+        try:
+            load_models([metric_name])
+
+            process_all_files(
+                files=files,
+                metric_names=[metric_name],
+                concurrent=False,
+            )
+
+        finally:
+            unload_model(metric_name)
+
+
 def main() -> None:
     """
     Run perplexity metadata computation.
@@ -447,7 +511,9 @@ def main() -> None:
 
     concurrent = (
         args.model == "all"
-        and len(metric_names) > 1
+        and can_run_metrics_concurrently(
+            metric_names
+        )
     )
 
     print(
@@ -466,17 +532,11 @@ def main() -> None:
 
     print_runtime_resources()
 
-    try:
-        load_models(metric_names)
-
-        process_all_files(
-            files=files,
-            metric_names=metric_names,
-            concurrent=concurrent,
-        )
-
-    finally:
-        unload_model()
+    run_requested_metrics(
+        files=files,
+        metric_names=metric_names,
+        concurrent=concurrent,
+    )
 
     print(
         "\nProcessing completed."

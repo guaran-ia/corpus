@@ -1374,34 +1374,25 @@ def compute_model_perplexity_batch(
         loaded_model (LoadedModel): Model resources to use.
 
     Returns:
-        List[Optional[float]]: Values aligned with input texts.
+        List[Optional[float]]: Finite perplexity values aligned with the input
+            texts. Empty texts return None.
+
+    Raises:
+        RuntimeError: If the average negative log-likelihood or calculated
+            perplexity is not finite, or if the exponential calculation
+            overflows.
     """
     tokenizer = loaded_model.tokenizer
     model = loaded_model.model
 
-    max_length = get_effective_max_length(
-        tokenizer,
-        model,
-    )
+    max_length = get_effective_max_length(tokenizer, model)
 
     validate_window_config(max_length)
 
-    total_negative_log_likelihoods = [
-        0.0
-        for _ in texts
-    ]
-
-    total_window_tokens = [
-        0
-        for _ in texts
-    ]
-
+    total_negative_log_likelihoods = [0.0 for _ in texts]
+    total_window_tokens = [0 for _ in texts]
     task_buffer: List[WindowTask] = []
-
-    initial_task_buffer_limit = max(
-        MAX_WINDOW_BATCH_SIZE * 4,
-        1,
-    )
+    initial_task_buffer_limit = max(MAX_WINDOW_BATCH_SIZE * 4, 1)
 
     def flush_tasks() -> None:
         if not task_buffer:
@@ -1412,18 +1403,9 @@ def compute_model_perplexity_batch(
             loaded_model=loaded_model,
         )
 
-        for (
-            document_index,
-            weighted_negative_log_likelihood,
-            window_length,
-        ) in batch_results:
-            total_negative_log_likelihoods[
-                document_index
-            ] += weighted_negative_log_likelihood
-
-            total_window_tokens[
-                document_index
-            ] += window_length
+        for document_index, weighted_negative_log_likelihood, window_length in batch_results:
+            total_negative_log_likelihoods[document_index] += weighted_negative_log_likelihood
+            total_window_tokens[document_index] += window_length
 
         task_buffer.clear()
 
@@ -1442,26 +1424,45 @@ def compute_model_perplexity_batch(
 
     results: List[Optional[float]] = []
 
-    for negative_log_likelihood, window_token_count in zip(
-        total_negative_log_likelihoods,
-        total_window_tokens,
+    for document_index, (negative_log_likelihood, window_token_count) in enumerate(
+        zip(total_negative_log_likelihoods, total_window_tokens)
     ):
         if window_token_count <= 0:
             results.append(None)
             continue
 
-        average_negative_log_likelihood = (
-            negative_log_likelihood
-            / window_token_count
-        )
+        average_negative_log_likelihood = negative_log_likelihood / window_token_count
 
-        try:
-            perplexity = math.exp(
-                average_negative_log_likelihood
+        if not math.isfinite(average_negative_log_likelihood):
+            raise RuntimeError(
+                "Perplexity calculation received a non-finite average "
+                "negative log-likelihood. "
+                f"Metric: {loaded_model.metric_name}. "
+                f"Document index: {document_index}. "
+                f"Average negative log-likelihood: "
+                f"{average_negative_log_likelihood}."
             )
 
-        except OverflowError:
-            perplexity = float("inf")
+        try:
+            perplexity = math.exp(average_negative_log_likelihood)
+        except OverflowError as error:
+            raise RuntimeError(
+                "Perplexity calculation overflowed. "
+                f"Metric: {loaded_model.metric_name}. "
+                f"Document index: {document_index}. "
+                f"Average negative log-likelihood: "
+                f"{average_negative_log_likelihood}."
+            ) from error
+
+        if not math.isfinite(perplexity):
+            raise RuntimeError(
+                "Perplexity calculation returned a non-finite value. "
+                f"Metric: {loaded_model.metric_name}. "
+                f"Document index: {document_index}. "
+                f"Average negative log-likelihood: "
+                f"{average_negative_log_likelihood}. "
+                f"Perplexity: {perplexity}."
+            )
 
         results.append(float(perplexity))
 

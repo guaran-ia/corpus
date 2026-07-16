@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import json
 import os
+import math
 
 from pathlib import Path
 from typing import Dict, Iterator, List
+from numbers import Real
 
 
 BASE_DIR = (
@@ -120,16 +122,32 @@ def record_has_metric(
     metric_name: str,
 ) -> bool:
     """
-    Check whether a record contains a valid metric.
+    Check whether a record contains a valid perplexity metric.
+
+    A valid metric must be a real numeric value, must not be a boolean,
+    must be finite, and must be greater than zero.
 
     Args:
         record (Dict): Document record.
         metric_name (str): Metric name.
 
     Returns:
-        bool: True when the metric value is not None.
+        bool: True when the metric contains a finite positive number.
     """
-    return record.get(metric_name) is not None
+    value = record.get(metric_name)
+
+    if (
+        not isinstance(value, Real)
+        or isinstance(value, bool)
+    ):
+        return False
+
+    numeric_value = float(value)
+
+    return (
+        math.isfinite(numeric_value)
+        and numeric_value > 0
+    )
 
 
 def initialize_corpus_report(
