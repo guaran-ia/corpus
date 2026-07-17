@@ -43,7 +43,7 @@ PERPLEXITY_MAX_LENGTH=8192
 PERPLEXITY_STRIDE=4096
 PERPLEXITY_TEXT_CHUNK_SIZE=32768
 
-BATCH_SIZE=1
+PERPLEXITY_DOCUMENT_BATCH_SIZE=1
 
 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 ```
@@ -63,7 +63,8 @@ PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
   `PERPLEXITY_TEXT_CHUNK_SIZE`   Size of the text chunk used during
                                  incremental tokenization.
 
-  `BATCH_SIZE`                   Number of documents processed per batch.
+  `PERPLEXITY_DOCUMENT_BATCH_SIZE`
+                                 Number of documents processed per batch.
 
   `HF_HOME`, `HF_HUB_CACHE`      Hugging Face cache directories.
 

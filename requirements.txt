@@ -11,4 +11,3 @@ hf_transfer==0.1.9
 accelerate==1.14.0
 protobuf==7.35.1
 python-dotenv==1.2.2
-dotenv==0.9.9
