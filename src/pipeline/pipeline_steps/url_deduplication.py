@@ -12,6 +12,7 @@ class URLDeduplication(PipelineStep):
     def __init__(self, duplicate_ids_path:str, ignore_files_path:str):
         self.duplicate_ids_path = duplicate_ids_path
         self.ignore_files_path = ignore_files_path
+
         self.step_report = StepReport(step_name=self.name)
         self.step_report.step_stats = {
             "processed_files":0,
@@ -20,7 +21,8 @@ class URLDeduplication(PipelineStep):
             "skipped_documents":0,
             "duplicate_documents":0,
             "non_duplicate_documents":0,
-            "unique_clusters":0
+            "unique_clusters":0,
+            "removed_documents":0,
         }
 
     @property
@@ -33,8 +35,6 @@ class URLDeduplication(PipelineStep):
     
     def run(self, source_directory:str, output_directory:str):
         print("Starting URL Deduplication")
-        #Deduplication with timestamp
-        #url_dedup_name = f"filter_url_{datetime.now().strftime("%Y%m%d%H%M%S")}"
 
         #Different directories for files to keep and remove
         keep_directory = os.path.join(output_directory, "keep")
@@ -44,6 +44,9 @@ class URLDeduplication(PipelineStep):
 
         os.makedirs(keep_directory, exist_ok = True)
         os.makedirs(remove_directory, exist_ok = True)
+
+        #Register the input directory:
+        self.step_report.input_directory = os.path.relpath(source_directory, output_directory)
 
         #Load ignore files list
         with open(self.ignore_files_path, "r") as f:
@@ -81,8 +84,8 @@ class URLDeduplication(PipelineStep):
                     #Update report stats
                     self.step_report.step_stats["skipped_files"] +=1
                     self.step_report.step_stats["skipped_documents"] += skipped_file_documents
+                    self.step_report.output_documents += skipped_file_documents
                     self.step_report.input_documents += skipped_file_documents
-                    self.step_report.remaining_documents += skipped_file_documents
 
                     continue
                 
@@ -131,14 +134,14 @@ class URLDeduplication(PipelineStep):
                                 #If we haven't seen the representative, it means that no document from this cluster has been included yet, so we keep it
                                 if representative not in seen_reps:
 
-                                    self.step_report.remaining_documents +=1
+                                    self.step_report.output_documents +=1
                                     file_data["remaining_documents"] +=1
 
                                     keep_writer.write(document, **write_config)
                                     seen_reps.add(representative)
                                 #If we have seen it, then another document from this cluster has been written before, so we remove it
                                 else:
-                                    self.step_report.removed_documents +=1
+                                    self.step_report.step_stats["removed_documents"] +=1
                                     file_data["removed_documents"] +=1
 
                                     remove_writer.write(document, **write_config)
@@ -148,7 +151,7 @@ class URLDeduplication(PipelineStep):
                                 self.step_report.step_stats["non_duplicate_documents"] +=1
                                 file_data["non_duplicate_documents"] +=1
 
-                                self.step_report.remaining_documents +=1
+                                self.step_report.output_documents +=1
                                 file_data["remaining_documents"] +=1
                             
                                 keep_writer.write(document, **write_config)
@@ -164,21 +167,8 @@ class URLDeduplication(PipelineStep):
         print("Writing report")
         report_path = os.path.join(output_directory, "report.json")
         os.makedirs(os.path.dirname(report_path), exist_ok = True)
+        self.step_report.output_directory = os.path.relpath(keep_directory, output_directory)
 
         self.step_report.write_json(report_path)
 
         return keep_directory
-
-
-# if __name__ == "__main__":
-#     url_deduplication = URLDeduplication(
-#         duplicate_ids_path = "outputs/deduplication/url_202605022046/duplicate_ids.json",
-#         ignore_files_path="outputs/deduplication/url_dedup_ignore_corpora.json",
-#     )
-    
-#     keep_directory = url_deduplication.run(
-#         source_directory = "data/processed",
-#         output_directory = "outputs/filtering"
-#     )
-
-#     print(f"URL Deduplication completed, keep files saved to {keep_directory}")

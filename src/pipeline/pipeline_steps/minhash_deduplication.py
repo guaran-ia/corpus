@@ -14,7 +14,8 @@ class MinHashDeduplication(PipelineStep):
         self.step_report.step_stats = {
             "duplicate_documents":0,
             "non_duplicate_documents":0,
-            "unique_clusters":0
+            "unique_clusters":0,
+            "removed_documents":0,
         }
     
     @property
@@ -38,6 +39,9 @@ class MinHashDeduplication(PipelineStep):
 
         os.makedirs(keep_directory, exist_ok = True)
         os.makedirs(remove_directory, exist_ok = True)
+
+        #Register the input directory:
+        self.step_report.input_directory = os.path.relpath(source_directory, output_directory)
 
         #Load duplicate ids map
         with open(self.duplicate_ids_path, "r") as f:
@@ -98,14 +102,14 @@ class MinHashDeduplication(PipelineStep):
                                 #If we haven't seen the representative, it means that no document from this cluster has been included yet, so we keep it
                                 if representative not in seen_reps:
 
-                                    self.step_report.remaining_documents +=1
+                                    self.step_report.output_documents +=1
                                     file_data["remaining_documents"] +=1
 
                                     keep_writer.write(document, **write_config)
                                     seen_reps.add(representative)
                                 #If we have seen it, then another document from this cluster has been written before, so we remove it
                                 else:
-                                    self.step_report.removed_documents +=1
+                                    self.step_report.step_stats["removed_documents"] +=1
                                     file_data["removed_documents"] +=1
 
                                     remove_writer.write(document, **write_config)
@@ -115,7 +119,7 @@ class MinHashDeduplication(PipelineStep):
                                 self.step_report.step_stats["non_duplicate_documents"] +=1
                                 file_data["non_duplicate_documents"] +=1
 
-                                self.step_report.remaining_documents +=1
+                                self.step_report.output_documents +=1
                                 file_data["remaining_documents"] +=1
                             
                                 keep_writer.write(document, **write_config)
@@ -132,6 +136,7 @@ class MinHashDeduplication(PipelineStep):
         print("Writing report")
         report_path = os.path.join(output_directory, "report.json")
         os.makedirs(os.path.dirname(report_path), exist_ok = True)
+        self.step_report.output_directory = os.path.relpath(keep_directory, output_directory)
 
         self.step_report.write_json(report_path)
 

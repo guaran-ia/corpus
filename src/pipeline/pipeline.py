@@ -42,16 +42,18 @@ class Pipeline():
                 "start_time":step_start_time,
                 "finish_time":step_finish_time,
                 "input_documents":step.report.input_documents,
-                "remaining_documents":step.report.remaining_documents,
-                "removed_documents":step.report.removed_documents
+                "output_documents":step.report.output_documents,
             }
+
+            self.report.step_metadata[f"{i}_{step.name}"].update(step.report.step_stats)
 
             if i == 1:
                 self.report.input_documents = step.report.input_documents
                 self.report.input_files = step.report.input_files
 
-            self.report.output_documents = step.report.remaining_documents
-            self.report.removed_documents += step.report.removed_documents
+            self.report.output_documents = step.report.output_documents
+
+            self.report.output_directory = os.path.relpath(step_input_directory, self.output_directory)
 
         print("Finished Pipeline")
         
