@@ -1,0 +1,6 @@
+{
+  "version_tag": "1.0.0",
+  "files_path": "2_minhash_deduplication/keep",
+  "changes": "First version of the corpus, including URL and MinHash Deduplication",
+  "previous_version": ""
+}

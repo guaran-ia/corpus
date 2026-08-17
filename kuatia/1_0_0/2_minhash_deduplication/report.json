@@ -1,0 +1,317 @@
+{
+  "step_name": "minhash_deduplication",
+  "input_directory": "../1_url_deduplication/keep",
+  "output_directory": "keep",
+  "step_stats": {
+    "duplicate_documents": 510251,
+    "non_duplicate_documents": 802746,
+    "unique_clusters": 157190,
+    "removed_documents": 353061
+  },
+  "input_documents": 1312997,
+  "output_documents": 959936,
+  "input_files": 43,
+  "file_stats": {
+    "Alpaca-gn-gpt3.5": {
+      "input_documents": 51595,
+      "remaining_documents": 51574,
+      "removed_documents": 21,
+      "duplicate_documents": 2295,
+      "non_duplicate_documents": 49300
+    },
+    "smolsent__en_gn": {
+      "input_documents": 863,
+      "remaining_documents": 863,
+      "removed_documents": 0,
+      "duplicate_documents": 0,
+      "non_duplicate_documents": 863
+    },
+    "opus": {
+      "input_documents": 267,
+      "remaining_documents": 31,
+      "removed_documents": 236,
+      "duplicate_documents": 267,
+      "non_duplicate_documents": 0
+    },
+    "apollomoebench": {
+      "input_documents": 262,
+      "remaining_documents": 262,
+      "removed_documents": 0,
+      "duplicate_documents": 0,
+      "non_duplicate_documents": 262
+    },
+    "guarania-scraped": {
+      "input_documents": 43160,
+      "remaining_documents": 23177,
+      "removed_documents": 19983,
+      "duplicate_documents": 23590,
+      "non_duplicate_documents": 19570
+    },
+    "jojajovai": {
+      "input_documents": 30855,
+      "remaining_documents": 30535,
+      "removed_documents": 320,
+      "duplicate_documents": 28177,
+      "non_duplicate_documents": 2678
+    },
+    "culturax": {
+      "input_documents": 55,
+      "remaining_documents": 52,
+      "removed_documents": 3,
+      "duplicate_documents": 45,
+      "non_duplicate_documents": 10
+    },
+    "gua_spa": {
+      "input_documents": 1500,
+      "remaining_documents": 748,
+      "removed_documents": 752,
+      "duplicate_documents": 911,
+      "non_duplicate_documents": 589
+    },
+    "commonvoice": {
+      "input_documents": 6154,
+      "remaining_documents": 6003,
+      "removed_documents": 151,
+      "duplicate_documents": 1256,
+      "non_duplicate_documents": 4898
+    },
+    "udhr-lid": {
+      "input_documents": 122,
+      "remaining_documents": 119,
+      "removed_documents": 3,
+      "duplicate_documents": 69,
+      "non_duplicate_documents": 53
+    },
+    "joff+": {
+      "input_documents": 2170,
+      "remaining_documents": 2163,
+      "removed_documents": 7,
+      "duplicate_documents": 1993,
+      "non_duplicate_documents": 177
+    },
+    "bible": {
+      "input_documents": 22818,
+      "remaining_documents": 22539,
+      "removed_documents": 279,
+      "duplicate_documents": 3600,
+      "non_duplicate_documents": 19218
+    },
+    "fineweb-2": {
+      "input_documents": 45397,
+      "remaining_documents": 21468,
+      "removed_documents": 23929,
+      "duplicate_documents": 38680,
+      "non_duplicate_documents": 6717
+    },
+    "moscar": {
+      "input_documents": 340,
+      "remaining_documents": 333,
+      "removed_documents": 7,
+      "duplicate_documents": 13,
+      "non_duplicate_documents": 327
+    },
+    "madlad400": {
+      "input_documents": 10927,
+      "remaining_documents": 6900,
+      "removed_documents": 4027,
+      "duplicate_documents": 7692,
+      "non_duplicate_documents": 3235
+    },
+    "tatoeba": {
+      "input_documents": 3367,
+      "remaining_documents": 3244,
+      "removed_documents": 123,
+      "duplicate_documents": 3170,
+      "non_duplicate_documents": 197
+    },
+    "multi-wiki-qa": {
+      "input_documents": 4850,
+      "remaining_documents": 610,
+      "removed_documents": 4240,
+      "duplicate_documents": 4846,
+      "non_duplicate_documents": 4
+    },
+    "mala-monolingual-split": {
+      "input_documents": 6180,
+      "remaining_documents": 3696,
+      "removed_documents": 2484,
+      "duplicate_documents": 2920,
+      "non_duplicate_documents": 3260
+    },
+    "ancora": {
+      "input_documents": 14120,
+      "remaining_documents": 14110,
+      "removed_documents": 10,
+      "duplicate_documents": 19,
+      "non_duplicate_documents": 14101
+    },
+    "twitter_politic_bots": {
+      "input_documents": 44,
+      "remaining_documents": 35,
+      "removed_documents": 9,
+      "duplicate_documents": 19,
+      "non_duplicate_documents": 25
+    },
+    "grammar": {
+      "input_documents": 277842,
+      "remaining_documents": 230118,
+      "removed_documents": 47724,
+      "duplicate_documents": 60672,
+      "non_duplicate_documents": 217170
+    },
+    "Alpaca-gn-gpt4": {
+      "input_documents": 51757,
+      "remaining_documents": 49465,
+      "removed_documents": 2292,
+      "duplicate_documents": 2301,
+      "non_duplicate_documents": 49456
+    },
+    "joemo": {
+      "input_documents": 1571,
+      "remaining_documents": 114,
+      "removed_documents": 1457,
+      "duplicate_documents": 1543,
+      "non_duplicate_documents": 28
+    },
+    "glot500": {
+      "input_documents": 81530,
+      "remaining_documents": 73834,
+      "removed_documents": 7696,
+      "duplicate_documents": 62240,
+      "non_duplicate_documents": 19290
+    },
+    "americasnlp2024": {
+      "input_documents": 109719,
+      "remaining_documents": 33469,
+      "removed_documents": 76250,
+      "duplicate_documents": 86714,
+      "non_duplicate_documents": 23005
+    },
+    "cc100_gn": {
+      "input_documents": 56361,
+      "remaining_documents": 11031,
+      "removed_documents": 45330,
+      "duplicate_documents": 50357,
+      "non_duplicate_documents": 6004
+    },
+    "opus-all-en": {
+      "input_documents": 417480,
+      "remaining_documents": 349723,
+      "removed_documents": 67757,
+      "duplicate_documents": 78397,
+      "non_duplicate_documents": 339083
+    },
+    "flores-200": {
+      "input_documents": 8024,
+      "remaining_documents": 0,
+      "removed_documents": 8024,
+      "duplicate_documents": 8024,
+      "non_duplicate_documents": 0
+    },
+    "americasnlp2022": {
+      "input_documents": 386,
+      "remaining_documents": 52,
+      "removed_documents": 334,
+      "duplicate_documents": 334,
+      "non_duplicate_documents": 52
+    },
+    "apollomoedataset": {
+      "input_documents": 2993,
+      "remaining_documents": 2993,
+      "removed_documents": 0,
+      "duplicate_documents": 0,
+      "non_duplicate_documents": 2993
+    },
+    "belele": {
+      "input_documents": 1800,
+      "remaining_documents": 1388,
+      "removed_documents": 412,
+      "duplicate_documents": 824,
+      "non_duplicate_documents": 976
+    },
+    "FinePDF": {
+      "input_documents": 187,
+      "remaining_documents": 182,
+      "removed_documents": 5,
+      "duplicate_documents": 5,
+      "non_duplicate_documents": 182
+    },
+    "twitter_covid_py": {
+      "input_documents": 2,
+      "remaining_documents": 2,
+      "removed_documents": 0,
+      "duplicate_documents": 2,
+      "non_duplicate_documents": 0
+    },
+    "orembae": {
+      "input_documents": 134,
+      "remaining_documents": 134,
+      "removed_documents": 0,
+      "duplicate_documents": 0,
+      "non_duplicate_documents": 134
+    },
+    "twitter_giossa_october": {
+      "input_documents": 4562,
+      "remaining_documents": 4369,
+      "removed_documents": 193,
+      "duplicate_documents": 235,
+      "non_duplicate_documents": 4327
+    },
+    "opus-all-es": {
+      "input_documents": 3907,
+      "remaining_documents": 0,
+      "removed_documents": 3907,
+      "duplicate_documents": 3907,
+      "non_duplicate_documents": 0
+    },
+    "josa": {
+      "input_documents": 3491,
+      "remaining_documents": 3272,
+      "removed_documents": 219,
+      "duplicate_documents": 221,
+      "non_duplicate_documents": 3270
+    },
+    "americasnli": {
+      "input_documents": 1990,
+      "remaining_documents": 0,
+      "removed_documents": 1990,
+      "duplicate_documents": 1990,
+      "non_duplicate_documents": 0
+    },
+    "americasnlp2023": {
+      "input_documents": 27027,
+      "remaining_documents": 0,
+      "removed_documents": 27027,
+      "duplicate_documents": 27027,
+      "non_duplicate_documents": 0
+    },
+    "hplt-3": {
+      "input_documents": 9757,
+      "remaining_documents": 5707,
+      "removed_documents": 4050,
+      "duplicate_documents": 4073,
+      "non_duplicate_documents": 5684
+    },
+    "jofun": {
+      "input_documents": 1842,
+      "remaining_documents": 59,
+      "removed_documents": 1783,
+      "duplicate_documents": 1783,
+      "non_duplicate_documents": 59
+    },
+    "twitter_covid_es": {
+      "input_documents": 20,
+      "remaining_documents": 6,
+      "removed_documents": 14,
+      "duplicate_documents": 17,
+      "non_duplicate_documents": 3
+    },
+    "gn-multi-affective-alpaca": {
+      "input_documents": 5569,
+      "remaining_documents": 5556,
+      "removed_documents": 13,
+      "duplicate_documents": 23,
+      "non_duplicate_documents": 5546
+    }
+  }
+}

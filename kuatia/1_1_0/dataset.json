@@ -1,0 +1,6 @@
+{
+  "version_tag": "1.1.0",
+  "files_path": "3_pii_censoring/censored",
+  "changes": "Added Censoring of Personal and Identifiable Information (PII)",
+  "previous_version": "../1_0_0/dataset.json"
+}

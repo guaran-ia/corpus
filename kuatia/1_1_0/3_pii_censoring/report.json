@@ -1,0 +1,410 @@
+{
+  "step_name": "pii_censoring",
+  "input_directory": "",
+  "output_directory": "kuatia/1_1_0/3_pii_censoring/censored",
+  "step_stats": {
+    "censoring_method": "replace",
+    "documents_with_pii": 4767,
+    "documents_with_pii_percentage": 0.004965956063737583,
+    "pii_counts_by_type": {
+      "email": 1048,
+      "phone": 3508,
+      "ip": 634
+    }
+  },
+  "input_documents": 959936,
+  "output_documents": 0,
+  "input_files": 39,
+  "file_stats": {
+    "Alpaca-gn-gpt3.5": {
+      "input_documents": 51574,
+      "documents_with_pii": 198,
+      "documents_with_pii_percentage": 0.0038391437546050336,
+      "pii_counts_by_type": {
+        "email": 52,
+        "phone": 76,
+        "ip": 7
+      }
+    },
+    "smolsent__en_gn": {
+      "input_documents": 863,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "opus": {
+      "input_documents": 31,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "apollomoebench": {
+      "input_documents": 262,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "guarania-scraped": {
+      "input_documents": 23177,
+      "documents_with_pii": 917,
+      "documents_with_pii_percentage": 0.03956508607671398,
+      "pii_counts_by_type": {
+        "email": 178,
+        "phone": 349,
+        "ip": 0
+      }
+    },
+    "jojajovai": {
+      "input_documents": 30535,
+      "documents_with_pii": 64,
+      "documents_with_pii_percentage": 0.002095955460946455,
+      "pii_counts_by_type": {
+        "email": 6,
+        "phone": 22,
+        "ip": 0
+      }
+    },
+    "culturax": {
+      "input_documents": 52,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "gua_spa": {
+      "input_documents": 748,
+      "documents_with_pii": 2,
+      "documents_with_pii_percentage": 0.00267379679144385,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "commonvoice": {
+      "input_documents": 6003,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "udhr-lid": {
+      "input_documents": 119,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "joff+": {
+      "input_documents": 2163,
+      "documents_with_pii": 1,
+      "documents_with_pii_percentage": 0.0004623208506703652,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "bible": {
+      "input_documents": 22539,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "fineweb-2": {
+      "input_documents": 21468,
+      "documents_with_pii": 1640,
+      "documents_with_pii_percentage": 0.07639277063536426,
+      "pii_counts_by_type": {
+        "email": 504,
+        "phone": 1624,
+        "ip": 528
+      }
+    },
+    "moscar": {
+      "input_documents": 333,
+      "documents_with_pii": 6,
+      "documents_with_pii_percentage": 0.018018018018018018,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 2,
+        "ip": 0
+      }
+    },
+    "madlad400": {
+      "input_documents": 6900,
+      "documents_with_pii": 448,
+      "documents_with_pii_percentage": 0.06492753623188406,
+      "pii_counts_by_type": {
+        "email": 92,
+        "phone": 752,
+        "ip": 37
+      }
+    },
+    "tatoeba": {
+      "input_documents": 3244,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "multi-wiki-qa": {
+      "input_documents": 610,
+      "documents_with_pii": 72,
+      "documents_with_pii_percentage": 0.1180327868852459,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 29,
+        "ip": 20
+      }
+    },
+    "mala-monolingual-split": {
+      "input_documents": 3696,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "ancora": {
+      "input_documents": 14110,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "twitter_politic_bots": {
+      "input_documents": 35,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "grammar": {
+      "input_documents": 230118,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "Alpaca-gn-gpt4": {
+      "input_documents": 49465,
+      "documents_with_pii": 270,
+      "documents_with_pii_percentage": 0.005458404932780754,
+      "pii_counts_by_type": {
+        "email": 51,
+        "phone": 173,
+        "ip": 23
+      }
+    },
+    "joemo": {
+      "input_documents": 114,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "glot500": {
+      "input_documents": 73834,
+      "documents_with_pii": 142,
+      "documents_with_pii_percentage": 0.001923233198797302,
+      "pii_counts_by_type": {
+        "email": 3,
+        "phone": 7,
+        "ip": 1
+      }
+    },
+    "americasnlp2024": {
+      "input_documents": 33469,
+      "documents_with_pii": 398,
+      "documents_with_pii_percentage": 0.01189160118318444,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 18,
+        "ip": 0
+      }
+    },
+    "cc100_gn": {
+      "input_documents": 11031,
+      "documents_with_pii": 11,
+      "documents_with_pii_percentage": 0.0009971897380110597,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "opus-all-en": {
+      "input_documents": 349723,
+      "documents_with_pii": 158,
+      "documents_with_pii_percentage": 0.00045178612787834943,
+      "pii_counts_by_type": {
+        "email": 6,
+        "phone": 25,
+        "ip": 0
+      }
+    },
+    "americasnlp2022": {
+      "input_documents": 52,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "apollomoedataset": {
+      "input_documents": 2993,
+      "documents_with_pii": 23,
+      "documents_with_pii_percentage": 0.007684597393919144,
+      "pii_counts_by_type": {
+        "email": 5,
+        "phone": 53,
+        "ip": 0
+      }
+    },
+    "belele": {
+      "input_documents": 1388,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "FinePDF": {
+      "input_documents": 182,
+      "documents_with_pii": 41,
+      "documents_with_pii_percentage": 0.22527472527472528,
+      "pii_counts_by_type": {
+        "email": 24,
+        "phone": 55,
+        "ip": 0
+      }
+    },
+    "twitter_covid_py": {
+      "input_documents": 2,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "orembae": {
+      "input_documents": 134,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "twitter_giossa_october": {
+      "input_documents": 4369,
+      "documents_with_pii": 1,
+      "documents_with_pii_percentage": 0.00022888532845044633,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "josa": {
+      "input_documents": 3272,
+      "documents_with_pii": 3,
+      "documents_with_pii_percentage": 0.0009168704156479218,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "hplt-3": {
+      "input_documents": 5707,
+      "documents_with_pii": 369,
+      "documents_with_pii_percentage": 0.06465743823374803,
+      "pii_counts_by_type": {
+        "email": 127,
+        "phone": 323,
+        "ip": 18
+      }
+    },
+    "jofun": {
+      "input_documents": 59,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "twitter_covid_es": {
+      "input_documents": 6,
+      "documents_with_pii": 0,
+      "documents_with_pii_percentage": 0.0,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    },
+    "gn-multi-affective-alpaca": {
+      "input_documents": 5556,
+      "documents_with_pii": 3,
+      "documents_with_pii_percentage": 0.0005399568034557236,
+      "pii_counts_by_type": {
+        "email": 0,
+        "phone": 0,
+        "ip": 0
+      }
+    }
+  }
+}

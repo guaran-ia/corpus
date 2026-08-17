@@ -1,0 +1,69 @@
+{
+  "start_time": "2026-08-03 23:35:30",
+  "finish_time": "2026-08-03 23:54:08",
+  "total_steps": 2,
+  "input_directory": "",
+  "output_directory": "2_minhash_deduplication/keep",
+  "input_documents": 1313005,
+  "output_documents": 959936,
+  "input_files": 43,
+  "system_info": {
+    "hostname": "guarania-highdev",
+    "os": {
+      "system": "Linux",
+      "release": "6.17.0-1018-azure",
+      "version": "#18~24.04.1-Ubuntu SMP Thu May 28 16:39:11 UTC 2026",
+      "machine": "x86_64"
+    },
+    "cpu": {
+      "physical_cores": 16,
+      "logical_cores": 32,
+      "frequency_mhz": 2588.2125625000003
+    },
+    "memory": {
+      "total_gb": 125.78,
+      "available_gb": 121.11
+    },
+    "python": {
+      "version": "3.12.7 (main, Nov 12 2025, 20:46:46) [GCC 13.3.0]",
+      "executable": "/disk/pipeline/.pipeline_env/bin/python"
+    },
+    "git_commit": "fb11e8bdb2f844a432e32773cdff9ab43fb6f5e4",
+    "environment": {
+      "OMP_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "CUDA_VISIBLE_DEVICES": null
+    }
+  },
+  "execution_info": {
+    "runtime_seconds": 1117.5303497659042,
+    "memory_rss_mb": 248.55,
+    "cpu_percent": 0.0
+  },
+  "step_metadata": {
+    "1_url_deduplication": {
+      "start_time": "2026-08-03 23:35:30",
+      "finish_time": "2026-08-03 23:44:40",
+      "input_documents": 1313005,
+      "output_documents": 1312997,
+      "processed_files": 36,
+      "processed_documents": 1244316,
+      "skipped_files": 7,
+      "skipped_documents": 68689,
+      "duplicate_documents": 1685,
+      "non_duplicate_documents": 1242631,
+      "unique_clusters": 1677,
+      "removed_documents": 8
+    },
+    "2_minhash_deduplication": {
+      "start_time": "2026-08-03 23:44:40",
+      "finish_time": "2026-08-03 23:54:08",
+      "input_documents": 1312997,
+      "output_documents": 959936,
+      "duplicate_documents": 510251,
+      "non_duplicate_documents": 802746,
+      "unique_clusters": 157190,
+      "removed_documents": 353061
+    }
+  }
+}

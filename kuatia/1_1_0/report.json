@@ -1,0 +1,59 @@
+{
+  "start_time": "2026-08-04 12:23:06",
+  "finish_time": "2026-08-04 12:30:13",
+  "total_steps": 1,
+  "input_directory": "",
+  "output_directory": "3_pii_censoring/censored",
+  "input_documents": 0,
+  "output_documents": 0,
+  "input_files": 0,
+  "system_info": {
+    "hostname": "guarania-highdev",
+    "os": {
+      "system": "Linux",
+      "release": "6.17.0-1018-azure",
+      "version": "#18~24.04.1-Ubuntu SMP Thu May 28 16:39:11 UTC 2026",
+      "machine": "x86_64"
+    },
+    "cpu": {
+      "physical_cores": 16,
+      "logical_cores": 32,
+      "frequency_mhz": 2423.42028125
+    },
+    "memory": {
+      "total_gb": 125.78,
+      "available_gb": 120.6
+    },
+    "python": {
+      "version": "3.12.7 (main, Nov 12 2025, 20:46:46) [GCC 13.3.0]",
+      "executable": "/disk/pipeline/.pipeline_env/bin/python"
+    },
+    "git_commit": "fb11e8bdb2f844a432e32773cdff9ab43fb6f5e4",
+    "environment": {
+      "OMP_NUM_THREADS": null,
+      "MKL_NUM_THREADS": null,
+      "CUDA_VISIBLE_DEVICES": null
+    }
+  },
+  "execution_info": {
+    "runtime_seconds": 427.22514352202415,
+    "memory_rss_mb": 54.89,
+    "cpu_percent": 0.0
+  },
+  "step_metadata": {
+    "3_pii_censoring": {
+      "start_time": "2026-08-04 12:23:06",
+      "finish_time": "2026-08-04 12:30:13",
+      "input_documents": 959936,
+      "output_documents": 0,
+      "censoring_method": "replace",
+      "documents_with_pii": 4767,
+      "documents_with_pii_percentage": 0.004965956063737583,
+      "pii_counts_by_type": {
+        "email": 1048,
+        "phone": 3508,
+        "ip": 634
+      }
+    }
+  }
+}
