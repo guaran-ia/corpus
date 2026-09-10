@@ -1,0 +1,17 @@
+task: mmlu_gn
+dataset_path: json
+dataset_name: null
+dataset_kwargs:
+  data_files: src/experiments/heuristics_filtering/sample_experiments/mmlu_eval/eval_tasks.jsonl
+test_split: train
+output_type: multiple_choice
+doc_to_text: "Embohovái ko porandu:\n{{question}}\n\nA. {{option_a}}\nB. {{option_b}}\nC. {{option_c}}\nD. {{option_d}}\n\nMbohovái:"
+doc_to_target: answer
+doc_to_choice: ["A", "B", "C", "D"]
+metric_list:
+  - metric: acc
+    aggregation: mean
+    higher_is_better: true
+  - metric: acc_norm
+    aggregation: mean
+    higher_is_better: true

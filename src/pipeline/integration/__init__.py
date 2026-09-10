@@ -4,6 +4,7 @@ from .pipeline_report import PipelineReport
 from .pipeline import Pipeline
 from .versioning import *
 from .huggingface_upload import *
+from .eval import *
 
 __all__ = [
     "load_jsonl", 
@@ -21,5 +22,9 @@ __all__ = [
     "register_release",
     "HuggingFaceDatasetUploader",
     "Pipeline",
-    "PipelineReport"
+    "PipelineReport",
+    "Experiment", 
+    "load_config", 
+    "ModelFineTuner", 
+    "ExperimentReport"
 ]

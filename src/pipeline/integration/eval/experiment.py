@@ -153,7 +153,12 @@ class Experiment:
                 output_directory=temp_directory,
             )
 
-            pipeline_output_path = pipeline.run()
+            pipeline.run()
+            print(f"Output Directory: {pipeline.report.output_directory}")
+
+            pipeline_output_path = os.path.join(temp_directory, pipeline.report.output_directory)
+
+            print(pipeline_output_path)
 
             # 1. Copy Pipeline Report
             pipeline_report_path = os.path.join(temp_directory, "report.json")
@@ -184,7 +189,9 @@ class Experiment:
             if self.model_trainer and self.lm_eval_tasks:
                 print("--- Fine-Tuning Model on Pipeline Output ---")
                 self.model_trainer.input_directory = pipeline_output_path
-                fine_tuned_model_dir = self.model_trainer.train()
+                self.model_trainer.train()
+
+                fine_tuned_model_dir = self.model_trainer.output_directory
 
                 print("--- Running LM Evaluation Harness ---")
                 use_cpu = getattr(self.model_trainer, "use_cpu", False)

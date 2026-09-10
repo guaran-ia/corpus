@@ -143,14 +143,14 @@ A Pipeline instance receives as arguments:
 
 - `input_directory`: a path to the directory with the input `.jsonl` files that will be processed by the Pipeline, these will be the input of the first Step.
 
-- `output_directory`:
+- `output_directory`: a path to the directory where all Pipeline outputs will be stored.
 
 - `start`: an integer detailing the start of the numeration of steps, it defaults to 1.
 
+Similar to a Step, a Pipeline also generates a [PipelineReport](pipeline_report.py) in a `report.py` file in the specified `output` directory.
+
 ## Experiments
 
-An Experiment is a way to evaluate a Pipeline to determine the quality
+An [`Experiment`](eval/experiment.py) is a way to evaluate a Pipeline to determine the quality of their output data. 
 
-## Dataset Version
-
-A dataset version is a collection of files containing
+Experiments are not covered in the tutorial notebook due to their complexity. Instead, you may check the [`sample_experiments`](../../experiments/heuristics_filtering/sample_experiments/) directory to see an implementation of an experiment using YAML config files. 

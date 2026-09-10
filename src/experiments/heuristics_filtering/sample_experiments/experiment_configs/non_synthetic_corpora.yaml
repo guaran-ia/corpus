@@ -1,0 +1,40 @@
+name: "non_synthetic_corpora"
+input_directory: "outputs/kuatia_1_0_0/2_minhash_deduplication/remove"
+output_directory: "outputs/heuristics_experiments/non_synthetic_corpora"
+steps:
+  - step_type: "HeuristicFilter"
+    args:
+      filtering_condition: "corpus in ['multi-wiki-qa', 'grammar', 'apollomoedataset', 'apollomoebench', 'ancora', 'Alpaca-gn-gpt3.5', 'Alpaca-gn-gpt4']"
+dataset_metrics:
+  weighted_relative_nll: !function src.experiments.heuristics_filtering.sample_experiments.experiment_utils.weighted_relative_nll
+model_trainer:
+  base_model_id: "princeton-nlp/gemma-2-9b-it-SimPO"
+  use_cpu: true  # Set to false if testing with a GPU
+  sft_config:
+    max_steps: 5                       # <--- Quick test run (stops after 5 steps)
+    per_device_train_batch_size: 1     # Low memory usage
+    learning_rate: 0.0002
+    logging_steps: 1                  # Print loss every single step
+    save_strategy: "no"               # Skip intermediate checkpoints to save disk I/O
+    bf16: false                        #If training in CPU
+    fp16: false                        #If training in CPU
+
+  # sft_config:
+  #   # Remove max_steps (or set max_steps: -1) and set epochs instead:
+  #   num_train_epochs: 3               # <--- Full production training
+  #   per_device_train_batch_size: 2
+  #   gradient_accumulation_steps: 4     # Effective batch size of 8
+  #   learning_rate: 0.0002
+  #   logging_steps: 10
+  #   save_strategy: "epoch"            # Save checkpoints per epoch
+
+  peft_config:
+    r: 16
+    lora_alpha: 32
+    lora_dropout: 0.05
+    target_modules: ["q_proj", "k_proj", "v_proj", "o_proj"]
+    #target_modules: "all-linear"
+    #target_modules: ["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"]
+lm_eval_tasks: 
+- 'mmlu_gn'
+lm_eval_include_path: "src/experiments/heuristics_filtering/sample_experiments/task_configs"

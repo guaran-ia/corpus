@@ -3,7 +3,7 @@ from .pipeline_steps import STEP_REGISTRY
 from .pipeline_report import PipelineReport
 import os
 from datetime import datetime
-from typing import List, Dict, Any, Union
+from typing import List, Dict, Any, Union, Type
 from .system_info import collect_system_info
 import time
 import psutil
@@ -15,7 +15,7 @@ class Pipeline():
     Executes a sequence of Pipeline Steps.
     
     """
-    def __init__(self, steps:List[Union[type[PipelineStep], Dict[str, Any]]], input_directory:str, output_directory:str, start: int = 1):
+    def __init__(self, steps:List[Union[Type[PipelineStep], Dict[str, Any]]], input_directory:str, output_directory:str, start: int = 1):
         self.steps = self._parse_steps(steps)
         self.input_directory = input_directory
         self.output_directory = output_directory
@@ -101,13 +101,14 @@ class Pipeline():
 
             self.report.step_metadata[f"{i}_{step.name}"].update(step.report.step_stats)
 
-            if i == 1:
+            if i == self.start:
                 self.report.input_documents = step.report.input_documents
                 self.report.input_files = step.report.input_files
 
             self.report.output_documents = step.report.output_documents
 
             self.report.output_directory = os.path.relpath(step_input_directory, self.output_directory)
+
 
         print("Finished Pipeline")
         
