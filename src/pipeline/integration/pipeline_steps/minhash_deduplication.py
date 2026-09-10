@@ -3,11 +3,18 @@ from .pipeline_step import PipelineStep
 from ..utils.loader import load_jsonl
 from ..utils.writer import JSONLWriter
 from .step_report import StepReport
-from datetime import datetime
 import json
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
+from typing import Dict, Any
 
 class MinHashDeduplication(PipelineStep):
+    """
+    Scans a directory of `.jsonl` files and eliminates Documents with similar MinHash signatures, leaving a single Document per cluster.
+
+    Args:
+        duplicate_ids_path (str): A path to the `.json` file containing the duplicate ids. The file shoud be the output of the MinHash deduplication, as specified in the deduplication directory.
+    """
+
     def __init__(self, duplicate_ids_path:str,):
         self.duplicate_ids_path = duplicate_ids_path
         self.step_report = StepReport(step_name=self.name)
@@ -26,10 +33,14 @@ class MinHashDeduplication(PipelineStep):
     def report(self) -> StepReport:
         return self.step_report
 
+    @classmethod
+    def from_dict(cls, config_dict:Dict[str, Any]) -> "MinHashDeduplication":
+        return cls(
+            duplicate_ids_path = config_dict.get("duplicate_ids_path"),
+        )
+
     def run(self, source_directory:str, output_directory:str):
         print("Starting MinHash Deduplication")
-        #Deduplication with timestamp
-        #minhash_dedup_name = f"filter_minhash_{datetime.now().strftime("%Y%m%d%H%M%S")}"
 
         #Different directories for files to keep and remove
         keep_directory = os.path.join(output_directory, "keep")

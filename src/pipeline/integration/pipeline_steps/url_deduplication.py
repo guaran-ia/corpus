@@ -3,13 +3,21 @@ from .pipeline_step import PipelineStep
 from ..utils.loader import load_jsonl
 from ..utils.writer import JSONLWriter
 from .step_report import StepReport
-from datetime import datetime
 import shutil
 import json
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
+from typing import Dict, Any
 
 class URLDeduplication(PipelineStep):
-    def __init__(self, duplicate_ids_path:str, ignore_files_path:str):
+    """
+    Scans a directory of `.jsonl` files and eliminates Documents that have the same URL, leaving only one document per URL.
+
+    Args:
+        duplicate_ids_path (str): A path to the `.json` file containing the duplicate ids. The file shoud be the output of the url deduplication, as specified in the deduplication directory.
+        ignore_files_path (str, Optional): A path to the `.json` file containing the file names to ignore for the deduplication. The file should be the output of checking for intracorpus urls, as specified in the deduplication directory.
+    """
+
+    def __init__(self, duplicate_ids_path:str, ignore_files_path:str = None):
         self.duplicate_ids_path = duplicate_ids_path
         self.ignore_files_path = ignore_files_path
 
@@ -32,6 +40,13 @@ class URLDeduplication(PipelineStep):
     @property
     def report(self) -> StepReport:
         return self.step_report
+
+    @classmethod
+    def from_dict(cls, config_dict:Dict[str, Any]) -> "URLDeduplication":
+        return cls(
+            duplicate_ids_path = config_dict.get("duplicate_ids_path"),
+            ignore_files_path = config_dict.get("ignore_files_path"),
+        )
     
     def run(self, source_directory:str, output_directory:str):
         print("Starting URL Deduplication")
@@ -49,8 +64,11 @@ class URLDeduplication(PipelineStep):
         self.step_report.input_directory = os.path.relpath(source_directory, output_directory)
 
         #Load ignore files list
-        with open(self.ignore_files_path, "r") as f:
-            ignore_files = set(json.load(f))
+        if self.ignore_files_path:
+            with open(self.ignore_files_path, "r") as f:
+                ignore_files = set(json.load(f))
+        else:
+            ignore_files = set()
 
         #Load duplicate ids map
         with open(self.duplicate_ids_path, "r") as f:

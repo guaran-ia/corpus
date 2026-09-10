@@ -3,13 +3,26 @@ from .pipeline_step import PipelineStep
 from ..utils.loader import load_jsonl
 from ..utils.writer import JSONLWriter
 from .step_report import StepReport
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 import warnings
 import faker
 import random
+from typing import Dict, Any
 
 
 class PIICensoring(PipelineStep):
+    """
+    Scans a directory of `.jsonl` files and censors spans in documents identified as containing Personal and Identifiable Information (PII) according to the specified method.
+
+    Args:
+        censoring_method (str, Optional): the censoring method to use, it must be one of ["tag", "stars", "replace"], defaults to "tag".
+            - `tag` replaces the PII span with a tag in curly braces indicating the type of PII (e.g. {email}).
+            - `stars` replaces the PII span with a string of asterisks ('*') of the same length as the span.
+            - `replace` replaces the PII span with a randomised text of the same type as the PII span (e.g. a real e-mail address gets replaced by "johndoe@domain.com")
+        overlap_handle (dict[str, Any], Optional): how to handle ovelapping spans, it contains two fields:
+            - `merge` *(bool, defaults to True)*: whether to merge overlapping spans of the same type.
+            - `priority` *(str, defaults to "right")*: how to handle overlaps of spans of different types. One of ['left', 'right', 'large', 'small'], prioretising the leftmost, rightmost, largest, or smallest span respectively.
+    """
     def __init__(self, censoring_method:str = "tag", overlap_handle:dict = {"merge":True, "priority":"right"}):
 
         self.step_report = StepReport(step_name=self.name)
@@ -37,6 +50,13 @@ class PIICensoring(PipelineStep):
     @property
     def report(self) -> StepReport:
         return self.step_report
+
+    @classmethod
+    def from_dict(cls, config_dict:Dict[str, Any]) -> "PIICensoring":
+        return cls(
+            censoring_method = config_dict.get("censoring_method"),
+            overlap_handle = config_dict.get("overlap_handle"),
+        )
 
     def _handle_overlap(self, first_span:dict, second_span:dict):
 
@@ -72,9 +92,9 @@ class PIICensoring(PipelineStep):
                 priority = self.overlap_handle['priority']
 
                 #If priority is according to size, define whether the left or right span is prioretized
-                if self.overlap_handle == "large":
+                if priority == "large":
                     priority = "left" if len(first_span['text']) > len(second_span['text']) else "right"
-                elif self.overlap_handle == "small":
+                elif priority == "small":
                     priority = "left" if len(first_span['text']) < len(second_span['text']) else "right"
             
 
@@ -155,6 +175,9 @@ class PIICensoring(PipelineStep):
 
         #Ensure that the directories exist
         os.makedirs(censored_directory, exist_ok = True)
+
+        #Register the input directory:
+        self.step_report.input_directory = os.path.relpath(source_directory, output_directory)
 
         #Iterate over all files in the directory
         files = [f for f in os.listdir(source_directory) if f.endswith(".jsonl")]

@@ -1,6 +1,6 @@
 import os
 from pydantic import BaseModel, Field, ValidationError
-from ..pipeline_report import PipelineReport
+from .. import PipelineReport, StepReport
 import json
 
 class DatasetVersion(BaseModel):
@@ -20,24 +20,30 @@ class DatasetVersion(BaseModel):
         # This will raise a ValidationError if the JSON doesn't match the schema
         return cls.model_validate(data)
 
-def register_release(directory, version, changes, previous_version = "") -> DatasetVersion:
+def register_release(directory:str, version:str, changes, previous_version = "") -> DatasetVersion:
+    """Registers a directory as a Dataset version by adding a `dataset.json` file to the directory.
 
-    """Registers a directory as a dataset version. The directory should be an output directory of a Pipeline execution, whether with one or many steps.
-
-    - **directory:** the relative directory with all the documents for the dataset.
-    - **version:** the version number, according to [Semantic Versioning](https://semver.org/) rules.
-    - **changes:** description of the changes 
+    Args:
+        directory (str): The directory to register as a version. Ideally, it should be the output directory of a pipeline run, but it may also be the output directory of a single step run, or simply a collection of files.
+    
+    Returns:
+        dataset_version (DatasetVersion): The corresponding DatasetVersion object.
     """
+
+    report_path = os.path.join(directory, "report.json")
+    report = None
     try:
-        report_path = os.path.join(directory, "report.json")
-        pipeline_report = PipelineReport.load_and_validate(report_path)
-    except:
-        print("Found no Pipeline Report")
-        return
+        #Try to find a pipeline report
+        report = PipelineReport.load_and_validate(report_path)
+    except ValidationError:
+        try:
+            report = StepReport.load_and_validate(report_path)
+        except:
+            print("Found no reports, registering directory as a DatasetVersion")
     
     dataset_version = DatasetVersion(
         version_tag=version,
-        files_path=pipeline_report.output_directory,
+        files_path=report.output_directory if report else ".",
         changes = changes,
         previous_version=previous_version
     )

@@ -1,0 +1,1 @@
+filtering_condition: "(language_score < p99_language_score) and (corpus in ['multi-wiki-qa', 'grammar', 'apollomoedataset', 'apollomoebench', 'ancora', 'Alpaca-gn-gpt3.5', 'Alpaca-gn-gpt4'])"

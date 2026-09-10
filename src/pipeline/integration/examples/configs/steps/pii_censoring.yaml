@@ -1,0 +1,4 @@
+censoring_method: "stars"
+overlap_handle:
+  merge: True
+  priority": "right"

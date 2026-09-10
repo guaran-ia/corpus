@@ -1,0 +1,11 @@
+steps:
+  - step_type: "URLDeduplication"
+    args:
+      duplicate_ids_path: "outputs/deduplication/url_202606011252/duplicate_ids.json"
+      ignore_files_path: "outputs/deduplication/url_dedup_ignore_corpora.json"
+  - step_type: "MinHashDeduplication"
+    args:
+      duplicate_ids_path: "outputs/deduplication/minhash_202606111735/duplicates.json"
+input_directory: "data/processed"
+output_directory: "outputs/sample_outputs/pipeline_yaml"
+start: 1

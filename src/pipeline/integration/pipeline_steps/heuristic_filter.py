@@ -1,18 +1,41 @@
 from .pipeline_step import PipelineStep
 from .step_report import StepReport
 import os
-from tqdm import tqdm
+from tqdm.autonotebook import tqdm
 from ..utils.writer import JSONLWriter
 from ..utils.loader import load_jsonl
 import re
 import numpy as np
+from typing import Dict, Any
 
 class HeuristicFilter(PipelineStep):
-    """Filters documents using their metadata."""
+    """
+    Scans a directory of `.jsonl` files and filters out documents based on metadata.
 
-    #Used to compile 
+    Args:
+        filtering_condition (str): A valid Python boolean expression evaluated against each document's metadata. **Documents matching this condition will be filtered out.**
+
+            **Condition Rules & Syntax:**
+            1. **Metadata Fields as Variables:** Every top-level key in a document's 
+               metadata is injected directly into the evaluation namespace as a variable name.
+               * Example: `"language_score < 0.9"`
+
+            2. **Percentile Queries:** To reference corpus-wide percentile thresholds, use 
+               the special pattern `p<N>_<field_name>`, where `<N>` 
+               is an integer or float percentage (using `_` as a decimal point).
+               When present, the filter pre-calculates global percentiles across all input files 
+               before evaluating documents.
+               * Example: `p10_num_words_split` (10th percentile of `num_words_split`)
+               * Example: `p99_5_avg_characters_per_sentence` (99.5th percentile of `avg_characters_per_sentence`)
+
+            3. **Combining Conditions:** Combine multiple conditions using standard Python 
+               logical operators (`and`, `or`, `not`) and parentheses.
+               * Example: `"(language_score < 0.9) or (num_words_split < p5_num_words_split)"`
+    """
+
+    #Used to compile the filtering conditions
     PERCENTILE_PATTERN = re.compile(
-        r'\b[pP](\d+(?:[._]\d+)?)\_([a-zA-Z_][a-zA-Z0-9_]*)\b'
+        r'\b[pP](\d+(?:_\d+)?)\_([a-zA-Z_][a-zA-Z0-9_]*)\b'
     )
 
     def __init__(self, filtering_condition:str):
@@ -32,18 +55,19 @@ class HeuristicFilter(PipelineStep):
         self._percentile_requests = self._parse_percentile_requests()
 
     def _parse_percentile_requests(self) -> list[tuple[str, str, float]]:
-
         matches = self.PERCENTILE_PATTERN.findall(self.filtering_condition)
 
         requests = []
 
         for p_str, field in matches:
-            
+            #Convert underscores to dots for floating-point parsing
             normalized_p = p_str.replace('_', '.')
             p_val = float(normalized_p)
             
+            #Reconstruct exact variable name as it appears in condition string (e.g. p99_5_field)
             var_name = f"p{p_str}_{field}"
             requests.append((var_name, field, p_val))
+            
         return requests
 
     @property
@@ -54,6 +78,12 @@ class HeuristicFilter(PipelineStep):
     def report(self) -> StepReport:
         return self.step_report
 
+    @classmethod
+    def from_dict(cls, config_dict:Dict[str, Any]) -> "HeuristicFilter":
+        return cls(
+            filtering_condition = config_dict.get("filtering_condition"),
+        )
+
     def _collect_percentiles(self, files: list[str], source_dir: str) -> dict[str, float]:
 
         #Collect all values of the required fields only
@@ -61,7 +91,7 @@ class HeuristicFilter(PipelineStep):
 
         for file in tqdm(files, desc="Computing global percentiles"):
             file_path = os.path.join(source_dir, file)
-            for document in load_jsonl(file_path, field_map={"id": "id"}, load_metadata=True, generate_id=False):
+            for document in load_jsonl(file_path, field_map={"text":"text", "id": "id"}, load_metadata=True, generate_id=False):
                 meta = document.metadata
                 for _, field, _ in self._percentile_requests:
                     val = meta.get(field)
@@ -94,6 +124,9 @@ class HeuristicFilter(PipelineStep):
         #Ensure that the keep and remove directories exist
         os.makedirs(keep_directory, exist_ok = True)
         os.makedirs(remove_directory, exist_ok = True)
+
+        #Register the input directory:
+        self.step_report.input_directory = os.path.relpath(source_directory, output_directory)
 
         #Iterate over all files in the directory
         files = [f for f in os.listdir(source_directory) if f.endswith(".jsonl")]

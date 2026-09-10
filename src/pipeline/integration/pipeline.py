@@ -3,46 +3,69 @@ from .pipeline_steps import STEP_REGISTRY
 from .pipeline_report import PipelineReport
 import os
 from datetime import datetime
-import json
+from typing import List, Dict, Any, Union
 from .system_info import collect_system_info
 import time
 import psutil
 import yaml
 
 class Pipeline():
-    def __init__(self, steps:list[PipelineStep], input_directory:str, output_directory:str, start: int = 1):
-        self.steps = steps
+    
+    """
+    Executes a sequence of Pipeline Steps.
+    
+    """
+    def __init__(self, steps:List[Union[type[PipelineStep], Dict[str, Any]]], input_directory:str, output_directory:str, start: int = 1):
+        self.steps = self._parse_steps(steps)
         self.input_directory = input_directory
         self.output_directory = output_directory
         self.report = PipelineReport(total_steps=len(steps))
         self.start = start
 
     @classmethod
+    def _parse_steps(cls, steps: List[Union[PipelineStep, Dict[str, Any]]]) -> List[type[PipelineStep]]:
+        """Ensures all step items are instantiated child classes of PipelineStep."""
+
+        parsed_steps = []
+
+        for step in steps:
+            if isinstance(step, PipelineStep):
+                parsed_steps.append(step)
+            elif isinstance(step, dict):
+                step_type_name = step["step_type"]
+                if step_type_name not in STEP_REGISTRY:
+                    raise ValueError(
+                        f"Unknown step type '{step_type_name}'. Available steps: {list(STEP_REGISTRY.keys())}"
+                    )
+                step_class = STEP_REGISTRY[step_type_name]
+                step_args = step.get("args")
+                parsed_steps.append(step_class.from_dict(step_args))
+            else:
+                raise TypeError(
+                    f"Step must be either a PipelineStep instance or a dictionary, got {type(step)}"
+                )
+        return parsed_steps
+
+    @classmethod
     def from_yaml(cls, yaml_path: str) -> "Pipeline":
+        """Instantiates a Pipeline from a YAML file."""
         with open(yaml_path, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
+        
+        return cls.from_dict(config)
 
-        steps = []
-        for step_config in config.get("steps", []):
-            step_type_name = step_config["step_type"]
-            step_args = step_config.get("args", {})
-
-            if step_type_name not in STEP_REGISTRY:
-                raise ValueError(
-                    f"Unknown step type '{step_type_name}'. Available steps: {list(STEP_REGISTRY.keys())}"
-                )
-
-            step_class = STEP_REGISTRY[step_type_name]
-            step_instance = step_class(**step_args)
-            steps.append(step_instance)
-
-        pipeline_config = config.get("pipeline", {})
+    @classmethod
+    def from_dict(cls, config: Dict[str, Any]) -> "Pipeline":
+        """
+        Instantiates a Pipeline directly from a configuration dictionary.
+        """
+        steps_config = config.get("steps", [])
 
         return cls(
-            steps=steps,
-            input_directory=pipeline_config.get("input_directory"),
-            output_directory=pipeline_config.get("output_directory"),
-            start=pipeline_config.get("start", 1)
+            steps=steps_config,  # Parsed via _parse_steps in __init__
+            input_directory=config.get("input_directory"),
+            output_directory=config.get("output_directory"),
+            start=config.get("start", 1),
         )
 
     def run(self):

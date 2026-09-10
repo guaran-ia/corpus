@@ -1,9 +1,9 @@
 from .utils import * 
 from .pipeline_steps import *
-from .huggingface_upload import *
-from .versioning import *
 from .pipeline_report import PipelineReport
 from .pipeline import Pipeline
+from .versioning import *
+from .huggingface_upload import *
 
 __all__ = [
     "load_jsonl", 
